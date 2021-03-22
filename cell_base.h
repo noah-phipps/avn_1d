@@ -1,3 +1,9 @@
+/*--------------------------------------------------------------------
+-------- -
+Cell Base Abstract Class
+21 / 03 / 2021 Modified by Noah PHIPPS (Removing depreceated C style code, optimising functions, formatting, generally rewritten)
+--------------------------------------------------------------------
+------ */
 #ifndef CELL_BASE_H
 #define CELL_BASE_H
 #define NEGLIGIBLE_SMALL pow(10,-5)
@@ -5,6 +11,8 @@
 #define R 8.31 // Universal gas constant
 #define T 308 // Absolute temperature
 #define RTF 26.738
+#include<string>
+
 class cell_base {
 	double vm{};
 	double vm_1{};
@@ -192,14 +200,25 @@ public:
 	}
 	virtual void calc_i_all(double, int, int) = 0;
 	virtual double get_total_ion(bool) = 0;
-	void calc_vm(double, int, bool);
+	void calc_vm(double time_step, int solve_method, bool i_bna_zero) {
+		double vm = (*this).get_vm();
+		double I = (*this).get_total_ion(i_bna_zero) + (*this).get_i_stim();
+
+		double cm = (*this).get_cm();
+		double diff_vm = -I / cm;
+		vm = solve_diff_eqn(vm, diff_vm, time_step, solve_method);
+		(*this).set_vm(vm);
+	}
 	void set_coupling_conductance(double g) {
 		coupling_conductance = g;
 	}
 	double get_coupling_conductance() {
 		return coupling_conductance;
 	}
-	double solve_diff_eqn(double, double, double, int);
+	double solve_diff_eqn(double x, double diff_x, double time_step, int solve_method) {
+		x = x + time_step * diff_x;
+		return x;
+	}
 	void block_na(double f) {
 		g_na = f * g_na;
 	}
@@ -207,5 +226,7 @@ public:
 		g_l = f * g_l;
 	}
 	virtual void export_cell(int) = 0;
+	virtual void print_currents(std::ofstream&,double,int) = 0;
 };
+
 #endif

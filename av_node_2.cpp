@@ -1,14 +1,12 @@
 /*--------------------------------------------------------------------
 -------- -
 AV node cell action potential model
-14 / 12 / 2007 Made by Shin INADA
-11 / 04 / 2008 Modified by Shin INADA(add ACh sensitive current)
-26 / 10 / 2008 Modified by Shin INADA(improve I_CaL for N cell)
-06 / 11 / 2008 Modified by Shin INADA(added intracellular calciumdynamics)
-07 / 11 / 2020 Modified by Noah PHIPPS & Gemma LAMB (Formatting and ACh handling)
-	--------------------------------------------------------------------
-	------ */
-	//Header file
+14 / 12 / 2007 Created by Shin INADA
+11 / 04 / 2008 Modified by Shin INADA(add ACh sensitive current, added intracellular calciumdynamics)
+07 / 11 / 2020 Modified by Noah PHIPPS & Gemma LAMB (Optimisation of currents with respect to experimental data)
+21 / 03 / 2021 Modified by Noah PHIPPS (Removing depreceated C style code, optimising functions, formatting, generally rewritten)
+--------------------------------------------------------------------
+------ */
 
 #include <math.h>
 #include "av_node_2.h"
@@ -16,52 +14,39 @@ AV node cell action potential model
 void av_node_2::initalise_avn(int cell_type) {
 	g_ach_max = 0.0198e-6;
 	i_ach = 0;
-	FILE* file_pointer;
+	std::string filename;
 	double* cell_parameters = new double[53];
 	set_cell_type(cell_type);
 	set_k_naca(SET_PARAMS(get_cm(), 2500.0e-12, 12187.5e-12));
 	if (cell_type == 16) { //AN cell
-		file_pointer = fopen("AnCell.txt", "rt");
-		cout << "\nSuccessfully opened AnCell.txt file...\n";
+		filename = "AnCell";
+		filename.append(all_files_suffix);
 	}
 	else if (cell_type == 19) {
-		file_pointer = fopen("NhCell.txt", "rt");
-		cout << "\nSuccessfully opened NhCell.txt...\n";
+		filename = "NhCell";
+		filename.append(all_files_suffix);
 	}
 	else {
-		file_pointer = fopen("NCell_CONTROL.txt", "rt");
-		cout << "\nSuccessfully opened NCell.txt file...\n";
+		filename = "NCell_CONTROL";
+		filename.append(all_files_suffix);
 	}
-	if (file_pointer == NULL)
-	{
-		//Display to console
-		printf("Cannot open a parameter file (each_cell.txt)\n");
-		cin >> ws;
+	std::ifstream input_file{ filename };
+	if (!input_file.good()) {
+		std::cout << "Could not open file..." << std::endl;
 		exit(1);
 	}
 	for (int j = 0; j < 53; ++j)
 	{
-		cell_parameters[j] = 0.0;
-	}
-	//Read parameters
-	for (int i = 0; i < 53; i++)
-	{
-		//for debug
-		//printf("i = %d\t", i);
-		//Read parameters
-		if (fscanf(file_pointer, "%lf", &cell_parameters[i]) == EOF)
-		{
-			std::cout << cell_parameters[i] << std::endl;
-			fclose(file_pointer);
-			//Display to console
-			printf("Cannot read parameter file\n");
-			//End of main function
-			exit(1);
+		try {
+			std::string new_value;
+			getline(input_file, new_value);
+			cell_parameters[j] = std::stod(new_value);
 		}
-		//for debug
-		//printf("%g\n", cell_parameters[i]);
-		//printf("%g\n", cell[cell_number][i]);
+		catch (...) {
+			std::cout << "error";
+		}
 	}
+	input_file.close();
 	//Set cell parameters
 	set_g_na(cell_parameters[0]);
 	set_g_ca(cell_parameters[1]);
@@ -129,29 +114,25 @@ void av_node_2::initalise_avn(int cell_type) {
 	set_rev_ca(134E-03);
 }
 
-
 av_node_2::av_node_2(int cell_type, int version) {
-
 	initalise_avn(cell_type);
-	string filename{ "avn_export_" };
-	filename.append(to_string(version));
-	filename.append(".txt");
-	FILE* import_file = fopen(filename.c_str(), "rt");
+	std::string filename{ import_file_prefix };
+	filename.append(std::to_string(version));
+	filename.append(all_files_suffix);
 	double* import_parameters = new double[71];
-	if (import_file == NULL) {
-		cout << "Error: Cannot import cell...";
-	}
+	std::ifstream input_file(filename);
 	for (int i = 0; i < 71; i++)
 	{
-
-		if (fscanf(import_file, "%lf", &import_parameters[i]) == EOF)
-		{
-			std::cout << import_parameters[i] << std::endl;
-			fclose(import_file);
-			printf("Cannot read parameter file\n");
-			exit(1);
+		try {
+			std::string new_value;
+			getline(input_file, new_value);
+			import_parameters[i] = std::stod(new_value);
+		}
+		catch (...) {
+			std::cout << "error";
 		}
 	}
+	input_file.close();
 	act_l = import_parameters[0];
 	fast_inact_l = import_parameters[1];
 	slow_inact_l = import_parameters[2];
@@ -209,8 +190,7 @@ av_node_2::av_node_2(int cell_type, int version) {
 	g_bna= import_parameters[54];
 	g_bca= import_parameters[55];
 	g_bk= import_parameters[56];
-	l= import_parameters[57];
-
+	l= static_cast<int>(import_parameters[57]);
 	//Now the cell base parameters
 	set_vm(import_parameters[58]);
 	set_vm_1(import_parameters[59]);
@@ -225,18 +205,13 @@ av_node_2::av_node_2(int cell_type, int version) {
 	set_rev_k(import_parameters[68]);
 	set_rev_ca(import_parameters[69]);
 	set_coupling_conductance(import_parameters[70]);
-
 }
 
-
 void av_node_2::export_cell(int version) {
-	string filename{ "avn_export_" };
-	filename.append(to_string(version));
-	filename.append(".txt");
-	FILE* export_file = fopen(filename.c_str(), "w");
-	if (export_file == NULL) {
-		cout << "Error: Cannot export cell...";
-	}
+	std::string filename{ "avn_export_" };
+	filename.append(std::to_string(version));
+	filename.append(all_files_suffix);
+	std::ofstream output_file{ filename };
 	double* export_parameters = new double[71];
 	export_parameters[0] = act_l;
 	export_parameters[1] = fast_inact_l;
@@ -296,7 +271,6 @@ void av_node_2::export_cell(int version) {
 	export_parameters[55] = g_bca;
 	export_parameters[56] = g_bk;
 	export_parameters[57] = l;
-
 	//Now the cell base parameters
 	export_parameters[58] = get_vm();
 	export_parameters[59] = get_vm_1();
@@ -311,17 +285,14 @@ void av_node_2::export_cell(int version) {
 	export_parameters[68] = get_rev_k();
 	export_parameters[69] = get_rev_ca();
 	export_parameters[70] = get_coupling_conductance();
-
 	for (int i{}; i < 71; i++) {
-		fprintf(export_file, "%g\t", export_parameters[i]);
+		output_file<< export_parameters[i];
 		if (i != 70) {
-			fprintf(export_file, "\n");
+			output_file << std::endl;
 		}
 	}
-	fflush(export_file);
-	fclose(export_file);
+	output_file.close();
 }
-
 
 void av_node_2::calc_na(double time_step, int solve_method) {
 	//Definition of local variables
@@ -363,8 +334,8 @@ void av_node_2::calc_na(double time_step, int solve_method) {
 			* (0.635 * fast_inact_na + 0.365 * slow_inact_na)
 			* get_na_out() * pow(F, 2.0) / (R * T)
 			* (exp((get_vm() - get_rev_na()) * F / (R * T))
-				+ get_vm() * F / (R * T)
-				* exp((get_vm() - get_rev_na()) * F / (R * T)) - 1.0)
+			+ get_vm() * F / (R * T)
+			* exp((get_vm() - get_rev_na()) * F / (R * T)) - 1.0)
 			/ (F / (R * T) * exp(get_vm() * F / (R * T)));
 	}
 }
@@ -376,10 +347,6 @@ void av_node_2::calc_b_na() {
 		get_P_na() * vm * ((pow(F, 2)) / (R * T)) * ((get_na_in() -
 			((get_na_out()) * exp(-(F * vm) / (R * T)))) / (1 - (exp(-(vm * F) /
 				(R * T)))));
-	//i_b_na =
-	//	get_P_na() * vm * ((pow(F, 2)) / (R * T)) * ((get_na_in() -
-	//		((get_na_out()) * exp(-(F * vm) / (R * T)))) / (1 - (exp(-(vm * F) /
-	//			(R * T)))));
 }
 void av_node_2::calc_l(double time_step, int solve_method) {
 	//Definition of variables
@@ -463,7 +430,6 @@ void av_node_2::calc_to(double time_step, int solve_method) {
 	double steady_state, time_constant, diff_value;
 	double fraction_inactivation_fast;
 	double act_shift = 0, inact_shift = 0, slope_shift = 0, slope_shift_inact = 0;
-
 	//Activation value
 	steady_state = 1.0 / (1.0 + exp((get_vm() * 1.0e+3 - 7.44 + act_shift) / (-16.4 + slope_shift)));
 	time_constant = 0.596e-3 + 3.118e-3 / (1.037 * exp(0.09 * (get_vm() * 1.0e+3 + 30.61)) + 0.396 * exp(-0.12 * (get_vm() * 1.0e+3 + 23.84)));
@@ -487,7 +453,6 @@ void av_node_2::calc_f(double time_step, int solve_method) {
 	//Definition of local variables
 	double steady_state, time_constant, diff_value;
 	double act_shift = 0, slope_shift = 0;
-
 	//Effect of acetylcholine (11/04/2008)
 	/*act_shift =
 	-7.2 * pow(get_ach(), 0.69)
@@ -505,7 +470,6 @@ void av_node_2::calc_st(double time_step, int solve_method) {
 	double alpha, beta;
 	double steady_state, time_constant, diff_value;
 	double act_shift = .3, slope_shift = .2;//(0,0 originally) (0.3, ?) works, .3 total is good
-
 	//Activation value
 	steady_state = 1.0 / (1.0 + exp((get_vm() * 1.0e+3 - (-49.10 + act_shift)) / (-8.98 + slope_shift)));//CHECKED
 	alpha = 1.0 / (0.15 * exp(-get_vm() * 1.0e+3 / 11.0) + 0.20 * exp(-get_vm() * 1.0e+3 / 700.0));//CHECKED
@@ -567,16 +531,10 @@ void av_node_2::calc_ach(double time_step, int solve_method, int l)
 {
 	double alpha, beta, diff_value, g_ach;
 	double k_ach = 3.5e-7;
-	double fastInactShift, fastSlopeShift, slowInactShift, slowSlopeShift, scaling_I, shift_I;
+	double fastInactShift{ 0 }, fastSlopeShift{ 0 }, slowInactShift{ 0 }, slowSlopeShift{ 0 }, scaling_I{ 0 }, shift_I{ 0 };
 	//double slopeinput = -15 + l*10;	
 	if (l == 0) {
-		set_ach_conc(0);
-		fastInactShift = 0;
-		fastSlopeShift = 0;
-		slowInactShift = 0;
-		slowSlopeShift = 0;
-		scaling_I = 0;
-		shift_I = 0;
+	set_ach_conc(0);
 	}
 	else if (l == 1) {
 		set_ach_conc(pow(10, -6));
@@ -622,10 +580,6 @@ void av_node_2::calc_ach(double time_step, int solve_method, int l)
 		slowSlopeShift = 20;
 		scaling_I = 1; //orig: 16 1: 0	
 		shift_I = 0.2 * pow(10, -11);
-	}
-	else {
-		std::cout << "invalid!" << std::endl;
-		exit(1);
 	}
 	alpha = 73.1;
 	beta = 120 / (1.0 + exp(-(get_vm() * 1.0e+3 + 50.0 + fastInactShift) / (15.0 + fastSlopeShift)));
@@ -691,19 +645,7 @@ void av_node_2::calc_ca_in(double time_step, int solve_method) {
 void av_node_2::set_vm_clamp(double voltage) {
 	set_vm(voltage);
 }
-void av_node_2::calc_vm(double time_step, int solve_method, double setVM, bool blocking_ibna, bool blocking_ical, double ical_block_multiplier) {
-	if (setVM == 1) {
-		double vm = get_vm();
-		double I = get_total_ion(blocking_ibna) + get_i_stim();
-		double cm = get_cm();
-		double diff_vm = -I / cm;
-		vm = solve_diff_eqn(vm, diff_vm, time_step, solve_method);
-		set_vm(vm);
-	}
-	else {
-		set_vm(setVM);
-	}
-}
+
 double av_node_2::calc_current_needed(double voltage, double time_step) {
 	double vm = get_vm();
 	double diff_vm;
@@ -711,4 +653,7 @@ double av_node_2::calc_current_needed(double voltage, double time_step) {
 	diff_vm = (voltage - vm) / time_step;
 	current_needed = -diff_vm * (get_cm());
 	return current_needed;
+}
+void av_node_2::print_currents(std::ofstream &output_file,double time, int cell_type) {
+	output_file << cell_type << "\t" << time << "\t" << i_na << "\t" << i_l << "\t" << i_kr << "\t" << i_f << "\t" << i_st << "\t" << i_to << "\t" << i_p << "\t" << i_naca << "\t" << i_b << "\t" << i_k1 << "\t" << i_sus << std::endl;
 }

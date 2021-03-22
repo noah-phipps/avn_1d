@@ -1,5 +1,14 @@
+/*--------------------------------------------------------------------
+-------- -
+AM Cell Action Potential Model
+21 / 03 / 2021 Modified by Noah PHIPPS (Removing depreceated C style code, optimising functions, formatting, generally rewritten)
+22 / 03 / 2021 Rewritten by Noah PHIPPS (Created functions for currents)
+--------------------------------------------------------------------
+------ */
 #include "cell_base.h"
 #include <math.h>
+#include"configuration.h"
+#include<fstream>
 #define HT 0.005
 #define R2 8314
 class am_cell :public cell_base {
@@ -106,4 +115,17 @@ public:
 		ECl = RTF * log(30. / 132.);
 		EbCl = ECl - 0.49 * (ECl + 30.59);
 	}
+	void print_currents(std::ofstream&,double,int);
+	void calc_INa(double, int);
+	void calc_IK(double, int);
+	void calc_Ik1(double, int);
+	void calc_Ito(double, int);
+	void calc_INaCa(double, int);
+	void calc_Ip(double, int);
+	void calc_Ib(double, int);
+	void calc_ICap(double, int);
+	void calc_ICaL(double, int);
+	void calc_ICaT(double, int);
+	void calc_Isus(double, int);
+	void calc_i_b_na(double, int);
 };
