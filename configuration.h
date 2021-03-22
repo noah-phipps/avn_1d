@@ -1,29 +1,28 @@
+/*--------------------------------------------------------------------
+-------- -
+AVN Model Configuration File
+21 / 03 / 2021	Created by Noah PHIPPS
+--------------------------------------------------------------------
+------ */
+
 #pragma once
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
-
-
+#include<string>
 
 //Parameters that need to be configured for the simulation
+//All declared as externals here, configure in the .cpp file
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//GENERAL PARAMETERS
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Simulation parameters
+extern bool run_in_remote_configuration;
 extern double sim_time;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
 extern double start_record; //Start recording to file once time is greater than this //40 for N, 3.6 for NH//9 for AN
-
 extern bool allow_main_simulation;
-
 extern double stim_time;
-extern int N_slow; //200
-extern int N_fast; //325
-
+extern int N_slow;
+extern int N_fast;
 extern double voltage;
-extern double max_dep_voltage; //Maximum depolarizing voltage
-
+extern double max_dep_voltage;
 extern int type;
-//SET to TRUE to set I_bna to zero
 extern bool i_bna_invest;
 extern int solve_method;
 extern int l;
@@ -33,22 +32,25 @@ extern bool blockCa;
 extern int answer;
 extern int answer2;
 extern int answer3;
-extern double factor_block;// = 1;
-
+extern double factor_block;
 extern double stim_current;
-
-
-//Timestep details
-extern double coarse_time_step;//Time step used initially
-extern double fine_time_step ;//Time step switched to if required
-extern double switch_to_fine;//Time to switch from coarse to fine at, set to longer than sim_time to avoid
-
+extern double coarse_time_step;
+extern double fine_time_step ;
+extern double switch_to_fine;
 extern bool am_open_fine;
 extern bool n_open_fine;
 extern bool an_open_fine;
 extern bool nh_open_fine;
-
 extern double total_time_taken;
 extern double total_time_steps;
 extern double time_per_step_estimate;
+extern bool import_am;
+extern bool import_n;
+extern bool import_an;
+extern bool import_nh;
+extern bool stimulate_test_cells;
+extern double test_cell_stim_interval;
+extern double test_stim_duration;
+extern std::string import_file_prefix;
+extern std::string all_files_suffix;
 #endif

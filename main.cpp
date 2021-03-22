@@ -1,6 +1,13 @@
+/*--------------------------------------------------------------------
+-------- -
+AVN Model main.cpp
+21 / 03 / 2021	Fully rewritten by Noah PHIPPS
+--------------------------------------------------------------------
+------ */
+
 #include "av_node_2.h"
-#include "output_files.h"
 #include "am_cell.h"
+#include"configuration.h"
 #include <iostream>
 #include<iomanip>
 #include <fstream>
@@ -8,29 +15,63 @@
 #include <vector>
 #include <chrono>
 #include<ctime>
-using namespace std;
 int main() {
-	vector<bool> percentages;
-	//Addition of SKF
-	/*
-	cout << "Add SKF? [1=yes, 2=no]\n";
-	cin >> answer;
-	cin.ignore();
-	cin.clear();
 
-	//Block
-	cout << "Block? Na=1, Ca=2, none=3\n";
-	cin >> answer2;
-	cin.ignore();
-	cin.clear();
+	std::string file_name = "fast_cells";
+	file_name.append(all_files_suffix);
+	std::ofstream fast_cell_data{ file_name };
 
-	//Addition of ACh
-	cout << "Add ACh? [0=no, 1=1uM, 2=100nM, 3=50nM, 4=30nM, 5=10nM]\n";
-	cin >> answer3;
-	cin.ignore();
-	cin.clear();
-	*/
-	//If adding ACh
+	file_name = "am_test_stim_current";
+	file_name.append(all_files_suffix);
+	std::ofstream am_test_stim_current{ file_name };
+
+
+	file_name = "slow_cells";
+	file_name.append(all_files_suffix);
+	std::ofstream slow_cell_data{ file_name };
+
+	file_name = "test_cells";
+	file_name.append(all_files_suffix);
+	std::ofstream  test_cell_data{ file_name };
+
+	file_name = "am_test_currents";
+	file_name.append(all_files_suffix);
+	std::ofstream  am_test_currents{ file_name };
+
+	file_name = "n_test_currents";
+	file_name.append(all_files_suffix);
+	std::ofstream  n_test_currents{ file_name };
+
+	file_name = "an_test_currents";
+	file_name.append(all_files_suffix);
+	std::ofstream  an_test_currents{ file_name };
+
+	file_name = "nh_test_currents";
+	file_name.append(all_files_suffix);
+	std::ofstream  nh_test_currents{ file_name };
+
+	std::vector<bool> percentages;
+
+	if (run_in_remote_configuration == false) {
+		//Addition of SKF
+		std::cout << "Add SKF? [1=yes, 2=no]\n";
+		std::cin >> answer;
+		std::cin.ignore();
+		std::cin.clear();
+
+		//Block
+		std::cout << "Block? Na=1, Ca=2, none=3\n";
+		std::cin >> answer2;
+		std::cin.ignore();
+		std::cin.clear();
+
+		//Addition of ACh
+		std::cout << "Add ACh? [0=no, 1=1uM, 2=100nM, 3=50nM, 4=30nM, 5=10nM]\n";
+		std::cin >> answer3;
+		std::cin.ignore();
+		std::cin.clear();
+	}
+
 	if (answer3 == 0) {
 		l = 0;
 	}
@@ -50,7 +91,7 @@ int main() {
 		l = 5;
 	}
 	else {
-		cerr << "incorrect input...\n\n\n";
+		std::cerr << "Incorrect input...\n\n\n";
 		exit(1);
 	}
 
@@ -77,82 +118,145 @@ int main() {
 		percentages.push_back(false);
 	}
 
-	cout << "Beginning cell initialisation..." << endl;
+	std::cout << "Beginning cell initialisation..." << std::endl;
 	//Initialise array of cells, slow and fast pathway
+	std::cout << N_fast;
 	cell_base** fast_cells = new cell_base * [N_fast];
 	cell_base** slow_cells = new cell_base * [N_slow];
 	cell_base** test_cells = new cell_base * [4];
 
 	//Now generate cells just to test them; am, n, an, nh
-	am_cell* test_am_cell = new am_cell(0);
+	am_cell* test_am_cell = new am_cell();
 	test_cells[0] = test_am_cell;
 
-	av_node_2* test_n_cell = new av_node_2(1);
+	av_node_2* test_n_cell = new av_node_2(1, 1);
 	test_cells[1] = test_n_cell;
 
-	av_node_2* test_an_cell = new av_node_2(16);
+	av_node_2* test_an_cell = new av_node_2(16, 2);
 	test_cells[2] = test_an_cell;
 
-	av_node_2* test_nh_cell = new av_node_2(19);
+	av_node_2* test_nh_cell = new av_node_2(19, 3);
 	test_cells[3] = test_nh_cell;
 
+	//Set i stim for test cells to be 0 when starting
 	for (int i{}; i < 4; i++) {
 		(*test_cells[i]).set_i_stim(0);
 	}
-	cout << "\nCell initialisation complete!" << endl;
+	std::cout << "\nCell initialisation complete!" << std::endl;
 	//Now generate the cells in the slow pathway
-	for (int cell_number = 0; cell_number < N_slow;
-		cell_number++) {
+	for (int cell_number = 0; cell_number < N_slow; cell_number++) {
 		if (cell_number < 75) {
-			am_cell* cell = new am_cell();
-			(*cell).set_coupling_conductance((1000E-9
-				- (500E-9 / (1 + exp((cell_number - 38) / -5))))); //jacks:500
-			slow_cells[cell_number] = cell;
+			if (import_am == true) {
+				am_cell* cell = new am_cell(0);
+				(*cell).set_coupling_conductance((1000E-9
+					- (500E-9 / (1 + exp((cell_number - 38) / -5))))); //jacks:500
+				slow_cells[cell_number] = cell;
+			}
+			else {
+				am_cell* cell = new am_cell();
+				(*cell).set_coupling_conductance((1000E-9
+					- (500E-9 / (1 + exp((cell_number - 38) / -5))))); //jacks:500
+				slow_cells[cell_number] = cell;
+			}
 		}
 		else {
-			av_node_2* cell = new av_node_2(1);
-			(*cell).set_coupling_conductance(300E-9); //jacks:300
-			slow_cells[cell_number] = cell;
+			if (import_n == true) {
+				av_node_2* cell = new av_node_2(1, 1);
+				(*cell).set_coupling_conductance(300E-9); //jacks:300
+				slow_cells[cell_number] = cell;
+			}
+			else {
+				av_node_2* cell = new av_node_2(1);
+				(*cell).set_coupling_conductance(300E-9); //jacks:300
+				slow_cells[cell_number] = cell;
+			}
+
 		}
 	}
 
 	//Now generate cells in the fast pathway
-	for (int cell_number = 0; cell_number < N_fast;
-		cell_number++) {
+	for (int cell_number = 0; cell_number < N_fast; cell_number++) {
 		if (cell_number < 125) {
-			am_cell* cell = new am_cell();
-			if (cell_number < 75) {
-				(*cell).set_coupling_conductance(1000E-9);
+			if (import_am == true) {
+				am_cell* cell = new am_cell(0);
+				if (cell_number < 75) {
+					(*cell).set_coupling_conductance(1000E-9);
+				}
+				else {
+					(*cell).set_coupling_conductance((1000E-9 - (500E-9 / (1 +
+						exp((cell_number - 120.5) / -5))))); //jacks:120.5
+				}
+				fast_cells[cell_number] = cell;
 			}
 			else {
-				(*cell).set_coupling_conductance((1000E-9 - (500E-9 / (1 +
-					exp((cell_number - 120.5) / -5))))); //jacks:120.5
+				am_cell* cell = new am_cell();
+				if (cell_number < 75) {
+					(*cell).set_coupling_conductance(1000E-9);
+				}
+				else {
+					(*cell).set_coupling_conductance((1000E-9 - (500E-9 / (1 +
+						exp((cell_number - 120.5) / -5))))); //jacks:120.5
+				}
+				fast_cells[cell_number] = cell;
 			}
-			fast_cells[cell_number] = cell;
+
 		}
 		else if (cell_number < 200) {
-			av_node_2* cell = new av_node_2(16);
-			(*cell).set_coupling_conductance(500E-9);
-			fast_cells[cell_number] = cell;
-		}
-		else if (cell_number >= 200 && cell_number < 225) {
-			av_node_2* cell = new av_node_2(1);
-			(*cell).set_coupling_conductance(300E-9);
-			(*cell).set_g_na(5E-13 / (1 +
-				exp((cell_number + 25 - 238) / 2.5))); //jacks: 5
-			fast_cells[cell_number] = cell;
-		}
-		else {
-			av_node_2* cell = new av_node_2(19);
-			if (cell_number < 250) {
-				(*cell).set_coupling_conductance(300E-9);
-				(*cell).set_g_na(5E-13 / (1 +
-					exp((cell_number + 25 - 263) / -2.5))); //jacks orig:5
+			if (import_an == true) {
+				av_node_2* cell = new av_node_2(16, 2);
+				(*cell).set_coupling_conductance(500E-9);
+				fast_cells[cell_number] = cell;
 			}
 			else {
-				(*cell).set_coupling_conductance(5000E-9); //jacks orig: 500
+				av_node_2* cell = new av_node_2(16);
+				(*cell).set_coupling_conductance(500E-9);
+				fast_cells[cell_number] = cell;
 			}
-			fast_cells[cell_number] = cell;
+
+		}
+		else if (cell_number >= 200 && cell_number < 225) {
+			if (import_n == true) {
+				av_node_2* cell = new av_node_2(1, 1);
+				(*cell).set_coupling_conductance(300E-9);
+				(*cell).set_g_na(5E-13 / (1 +
+					exp((cell_number + 25.0 - 238.0) / 2.5))); //jacks: 5
+				fast_cells[cell_number] = cell;
+			}
+			else {
+				av_node_2* cell = new av_node_2(1);
+				(*cell).set_coupling_conductance(300E-9);
+				(*cell).set_g_na(5E-13 / (1 +
+					exp((cell_number + 2.05 - 238.0) / 2.5))); //jacks: 5
+				fast_cells[cell_number] = cell;
+			}
+
+		}
+		else {
+			if (import_nh == true) {
+				av_node_2* cell = new av_node_2(19, 3);
+				if (cell_number < 250) {
+					(*cell).set_coupling_conductance(300E-9);
+					(*cell).set_g_na(5E-13 / (1 +
+						exp((cell_number + 25.0 - 263.0) / -2.5))); //jacks orig:5
+				}
+				else {
+					(*cell).set_coupling_conductance(5000E-9); //jacks orig: 500
+				}
+				fast_cells[cell_number] = cell;
+			}
+			else {
+				av_node_2* cell = new av_node_2(19);
+				if (cell_number < 250) {
+					(*cell).set_coupling_conductance(300E-9);
+					(*cell).set_g_na(5E-13 / (1 +
+						exp((cell_number + 25.0 - 263.0) / -2.5))); //jacks orig:5
+				}
+				else {
+					(*cell).set_coupling_conductance(5000E-9); //jacks orig: 500
+				}
+				fast_cells[cell_number] = cell;
+			}
+
 		}
 	}
 
@@ -202,10 +306,11 @@ int main() {
 	}
 
 	//i_bna_invest = true;
-	//INITIALISE
+
+	//INITIALISE and estimate sim  time
 	double time = 0;
 	int size = 0;//Number of timesteps in simulation
-	cout << "\nEstimating simulation time..."<<endl;
+	std::cout << "\nEstimating simulation time..." << std::endl;
 	while (time <= sim_time) {
 		size++;
 		time = time + time_step;
@@ -214,403 +319,248 @@ int main() {
 	total_time_steps = size;
 	std::chrono::time_point<std::chrono::system_clock> time_right_now = std::chrono::system_clock::now();
 	std::time_t t_c = std::chrono::system_clock::to_time_t(time_right_now + std::chrono::seconds(static_cast<int>(total_time_steps * time_per_step_estimate)));
-	cout << "\nOperation complete...\nEstimated time to complete simulation is " << total_time_steps * time_per_step_estimate << " [secs], or " << total_time_steps * time_per_step_estimate / 60 << " [mins]." << endl;
-	cout <<"Estimated completion time is "<< std::put_time(std::localtime(&t_c), "%F %T.\n") << endl;
-
-	cout<<"Updates will be given every 10\ % "<<endl<<endl;
-
-
-	//Arrays, one value for each timestep
-	//double* time_array = new double[size];
-	//double* first_AM_vm = new double[size]; // First AM cell(1st fast cell) for reference
-	//double* AM_vm = new double[size]; // Last AM cell (75thfast cell) before start of fast / slow pathways
-	//double* SP_vm = new double[size]; // Middle slow pathwaycell
-	//double* FP_vm = new double[size]; // Middle fast pathwaycell
-	//double* PB_vm = new double[size]; // Start of penetratingbundle
-	//double* HB_vm = new double[size]; // Middle His Bundlecell
-	//double* SP_end_vm = new double[size]; // End of the slowpathway
-	//double* vm_array_atrium_start = new double[size];
-	//double* vm_array_atrium_end = new double[size];
-	//double* vm_array_slow_start = new double[size];
-	//double* vm_array_slow_end = new double[size];
-	//double* diff_vm_array = new double[size];
-	am_cell cell;
-
+	std::cout << "\nOperation complete...\nEstimated time to complete simulation is " << total_time_steps * time_per_step_estimate << " [secs], or " << total_time_steps * time_per_step_estimate / 60 << " [mins]." << std::endl;
+	//std::cout <<"Estimated completion time is "<< std::put_time(std::localtime(&t_c), "%F %T.\n") << std::endl;
+	std::cout << "Updates will be given every 10% " << std::endl << std::endl;
 
 	//Initialise array counter
 	int array_counter = 0;
-	double deltaS = 0.35; //orig = 0.35
+	double deltaS = 0.1; //orig = 0.35
 
-
-
-
-
-
-//START SIMULATION
-	cout << "Starting simulation...";
+	//START SIMULATION
+	std::cout << "Starting simulation...";
 	std::chrono::steady_clock::time_point sim_start = std::chrono::steady_clock::now();
 	std::chrono::steady_clock::time_point percent_start = std::chrono::steady_clock::now();
+	int test_cell_stim_counter[4];
+	test_cell_stim_counter[0] = 1;
+	test_cell_stim_counter[1] = 1;
+	test_cell_stim_counter[2] = 1;
+	test_cell_stim_counter[3] = 1;
 
 	while (time <= sim_time) {
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//Do the test cells simulation here
 		for (int i{}; i < 4; i++) {
-			(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
-			(*test_cells[i]).calc_vm(time_step, solve_method, false);
-		}
-
-	if (array_counter % 2000 == 0) {
-		//cout << "array counter is " << array_counter << endl;
-		fprintf(test_cell_data, "%g\t", time);
-		for (int i = 0; i < 4; i++) {
-			fprintf(test_cell_data, "% g\t", (*test_cells[i]).get_vm());
-		}
-		fprintf(test_cell_data, "\n");
-	}
-		//end test cells simulation
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if (allow_main_simulation == true) {
-		bool i_bna_zero = false;
-		if (i_bna_invest) {
-			i_bna_zero = true;
-		}
-
-		//control stim time
-		for (int noStim = 0; noStim < 20; noStim++) {
-			if (time > (0.1 + noStim * deltaS) && time <
-				(0.1 + noStim * deltaS) + stim_time) {
-				stim_current = -1.2e-9;
-			}
-		}
-
-		//Loop over fast pathway
-		for (int i = 0; i < N_fast; i++) {
-			(*fast_cells[i]).set_i_stim(0);
-			(*fast_cells[i]).calc_i_all(time_step, solve_method, l);
-			bool stim = false;
-			if (i == 0) {
-				//double cell_current =(*fast_cells[i]).get_coupling_conductance()* ((*fast_cells[i]).get_vm() - (*fast_cells[i + 1]).get_vm());
-				if ((*fast_cells[i]).get_cell_type() == 2) {
-					(*fast_cells[i]).set_i_stim(stim_current * 2.5E12);
-				}
-				else {
-					(*fast_cells[i]).set_i_stim(stim_current);
-				}
-			}
-			else if (i == 74) {
-				// Due to three nearest neighbours
-				double cell_current =
-					(*fast_cells[i]).get_coupling_conductance() * (3 * (*fast_cells[i]).get_vm() - (*fast_cells[i - 1]).get_vm() - (*fast_cells[i + 1]).get_vm() - (*slow_cells[0]).get_vm());
-				cell_current +=
-					(((*fast_cells[i + 1]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() - (*fast_cells[i + 1]).get_vm())) / 4;
-				cell_current +=
-					(((*fast_cells[i + 1]).get_coupling_conductance() - (*slow_cells[0]).get_coupling_conductance()) * ((*slow_cells[0]).get_vm() - (*fast_cells[i + 1]).get_vm())) / 4;
-				cell_current +=
-					(((*slow_cells[0]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() - (*slow_cells[0]).get_vm())) / 4;
-				if ((*fast_cells[i]).get_cell_type() == 2) {
-					//Due to different AMcell units
-					(*fast_cells[i]).set_i_stim(cell_current * 1000E9);
-				}
-				else {
-					(*fast_cells[i]).set_i_stim(cell_current);
-				}
-			}
-			else if (i == 224) {
-				double cell_current =
-					(*fast_cells[i]).get_coupling_conductance() * (3 * (*fast_cells[i]).get_vm() - (*fast_cells[i - 1]).get_vm() - (*fast_cells[i + 1]).get_vm() - (*slow_cells[N_slow - 1]).get_vm());
-				cell_current +=
-					((*fast_cells[i + 1]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() + (*fast_cells[i + 1]).get_vm()) / 4;
-				cell_current +=
-					((*fast_cells[i + 1]).get_coupling_conductance() - (*slow_cells[N_slow - 1]).get_coupling_conductance()) * ((*slow_cells[N_slow - 1]).get_vm() + (*fast_cells[i + 1]).get_vm()) / 4;
-				cell_current +=
-					((*slow_cells[N_slow - 1]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() + (*slow_cells[N_slow - 1]).get_vm()) / 4;
-				if ((*fast_cells[i]).get_cell_type() == 2) {
-					//Due to different AMcell units
-					(*fast_cells[i]).set_i_stim(cell_current * 1000E9);
-				}
-				else {
-					(*fast_cells[i]).set_i_stim(cell_current);
-				}
-			}
-			else if (i != 0 && i != 224 && i != (N_fast - 1) && i != 74) {
-				double cell_current =
-					(*fast_cells[i]).get_coupling_conductance() * (2 * (*fast_cells[i]).get_vm() - (*fast_cells[i - 1]).get_vm() - (*fast_cells[i + 1]).get_vm());
-				cell_current +=
-					((*fast_cells[i + 1]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() - (*fast_cells[i + 1]).get_vm()) / 4;
-				if ((*fast_cells[i]).get_cell_type() == 2) {
-					(*fast_cells[i]).set_i_stim(cell_current * 1000E9);
-				}
-				else {
-					(*fast_cells[i]).set_i_stim(cell_current);
-				}
-			}
-			else if (i == N_fast - 1) {
-				//Ghost cell with same vm as i
-				double cell_current =
-					(*fast_cells[i]).get_coupling_conductance() * ((*fast_cells[i]).get_vm() - (*fast_cells[i - 1]).get_vm());
-				cell_current +=
-					((*fast_cells[i]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() - (*fast_cells[i]).get_vm()) / 4;
-				if ((*fast_cells[i]).get_cell_type() == 2) {
-					(*fast_cells[i]).set_i_stim(cell_current * 1000E9);
-				}
-				else {
-					(*fast_cells[i]).set_i_stim(cell_current);
-				}
-			}
-		}
-
-		//Loop over slow pathway
-		for (int i = 0; i < N_slow; i++) {
-			(*slow_cells[i]).set_i_stim(0);
-			(*slow_cells[i]).calc_i_all(time_step, solve_method, l);
-			if (i == 0) {
-				double cell_current =
-					(*slow_cells[i]).get_coupling_conductance() * (2 * (*slow_cells[i]).get_vm() - (*fast_cells[74]).get_vm() - (*slow_cells[i + 1]).get_vm());
-				cell_current +=
-					((*slow_cells[i + 1]).get_coupling_conductance() - (*fast_cells[74]).get_coupling_conductance()) * ((*fast_cells[74]).get_vm() - (*slow_cells[i + 1]).get_vm()) / 4;
-				if ((*slow_cells[i]).get_cell_type() == 2) {
-					(*slow_cells[i]).set_i_stim(cell_current * 1000E9);
-				}
-				else {
-					(*slow_cells[i]).set_i_stim(cell_current);
-				}
-			}
-			else if (i == (N_slow - 1)) {
-				double cell_current =
-					(*slow_cells[i]).get_coupling_conductance() * (2 * (*slow_cells[i]).get_vm() - (*slow_cells[i - 1]).get_vm() - (*fast_cells[224]).get_vm());
-				cell_current +=
-					((*fast_cells[224]).get_coupling_conductance() - (*slow_cells[i - 1]).get_coupling_conductance()) * ((*slow_cells[i - 1]).get_vm() - (*fast_cells[224]).get_vm()) / 4;
-				double test = cell_current;
-				if ((*slow_cells[i]).get_cell_type() == 2) {
-					(*slow_cells[i]).set_i_stim(cell_current * 1000E9);
-				}
-				else {
-					(*slow_cells[i]).set_i_stim(cell_current);
-				}
+			if (stimulate_test_cells == false) {
+				(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+				(*test_cells[i]).calc_vm(time_step, solve_method, false);
 			}
 			else {
-				double cell_current =
-					(*slow_cells[i]).get_coupling_conductance() * (2 * (*slow_cells[i]).get_vm() - (*slow_cells[i - 1]).get_vm() - (*slow_cells[i + 1]).get_vm());
-				cell_current +=
-					((*slow_cells[i + 1]).get_coupling_conductance() - (*slow_cells[i - 1]).get_coupling_conductance()) * ((*slow_cells[i - 1]).get_vm() - (*slow_cells[i + 1]).get_vm()) / 4;
-				if (cell_current != 0) {
-					double test = 0;
+				if (time >= test_cell_stim_counter[i] * test_cell_stim_interval) {
+					(*test_cells[i]).set_i_stim(stim_current);
+					if (i == 0) {
+						(*test_cells[i]).set_i_stim(stim_current * 2.5E12);
+					}
+					if (time >= test_stim_duration + (test_cell_stim_counter[i] * test_cell_stim_interval)) {
+						(*test_cells[i]).set_i_stim(0);
+						(test_cell_stim_counter[i]) += 1;
+					}
 				}
-				if ((*slow_cells[i]).get_cell_type() == 2) {
-					(*slow_cells[i]).set_i_stim(cell_current * 1000E9);
-				}
-				else {
-					(*slow_cells[i]).set_i_stim(cell_current);
-				}
+				(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+				(*test_cells[i]).calc_vm(time_step, solve_method, false);
 			}
 		}
-
-		for (int i = 0; i < N_fast; i++) {
-			(*fast_cells[i]).calc_vm(time_step, solve_method, i_bna_zero);
-		}
-		for (int i = 0; i < N_slow; i++) {
-			(*slow_cells[i]).calc_vm(time_step, solve_method, i_bna_zero);
-		}
-
 
 		if (array_counter % 2000 == 0) {
 			//cout << "array counter is " << array_counter << endl;
-			fprintf(fast_cell_data, "%g\t", time);
-			for (int i = 0; i < N_fast / 5; i++) {
-				double AP_shifter = (*fast_cells[i * 5]).get_vm() - (0.01 * i);
-				fprintf(fast_cell_data, "% g\t", AP_shifter);
+			test_cell_data << time << "\t";
+			for (int i = 0; i < 4; i++) {
+				test_cell_data << (*test_cells[i]).get_vm() << "\t";
 			}
-			fprintf(slow_cell_data, "%g\t", time);
-			for (int i = 0; i < N_slow / 5; i++) {
-				double AP_shifter = (*slow_cells[i * 5]).get_vm() - (0.01 * i);
-				fprintf(slow_cell_data, "% g\t", AP_shifter);
-			}
-			fprintf(fast_cell_data, "\n");
-			fprintf(slow_cell_data, "\n");
+			(*test_cells[0]).print_currents(am_test_currents, time, 2);
+			(*test_cells[1]).print_currents(n_test_currents, time, 1);
+			(*test_cells[2]).print_currents(an_test_currents, time, 16);
+			(*test_cells[3]).print_currents(nh_test_currents, time, 19);
+			am_test_stim_current << time << "\t" << (*test_cells[0]).get_i_stim() << std::endl;
+			test_cell_data << std::endl;
 		}
-		//Writing stuff to arrays
+		//end test cells simulation
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		if (allow_main_simulation == true) {
+			bool i_bna_zero = false;
+			if (i_bna_invest) {
+				i_bna_zero = true;
+			}
+			stim_current = 0;
+			//control stim time
+			for (int noStim = 0; noStim < 20; noStim++) {
+				if (time > (0.1 + noStim * deltaS) && time < (0.1 + noStim * deltaS) + stim_time) {
+					stim_current = -1.2e-9;
+				}
+			}
+			//Loop over fast pathway
+			for (int i = 0; i < N_fast; i++) {
+				(*fast_cells[i]).set_i_stim(0);
+				(*fast_cells[i]).calc_i_all(time_step, solve_method, l);
+				bool stim = false;
+				if (i == 0) {
+					double cell_current = (*fast_cells)[i].get_coupling_conductance() * ((*fast_cells)[i].get_vm() - (*fast_cells)[i + 1].get_vm());
+					if ((*fast_cells[i]).get_cell_type() == 2) {
+						(*fast_cells[i]).set_i_stim(stim_current * 2.5E12);
+					}
+					else {
+						(*fast_cells[i]).set_i_stim(stim_current);
+					}
+				}
+				else if (i == 74) {
+					// Due to three nearest neighbours
+					double cell_current =
+						(*fast_cells[i]).get_coupling_conductance() * (3 * (*fast_cells[i]).get_vm() - (*fast_cells[i - 1]).get_vm() - (*fast_cells[i + 1]).get_vm() - (*slow_cells[0]).get_vm());
+					cell_current +=
+						(((*fast_cells[i + 1]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() - (*fast_cells[i + 1]).get_vm())) / 4;
+					cell_current +=
+						(((*fast_cells[i + 1]).get_coupling_conductance() - (*slow_cells[0]).get_coupling_conductance()) * ((*slow_cells[0]).get_vm() - (*fast_cells[i + 1]).get_vm())) / 4;
+					cell_current +=
+						(((*slow_cells[0]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() - (*slow_cells[0]).get_vm())) / 4;
+					if ((*fast_cells[i]).get_cell_type() == 2) {
+						//Due to different AMcell units
+						(*fast_cells[i]).set_i_stim(cell_current * 1000E9);
+					}
+					else {
+						(*fast_cells[i]).set_i_stim(cell_current);
+					}
+				}
+				else if (i == 224) {
+					double cell_current =
+						(*fast_cells[i]).get_coupling_conductance() * (3 * (*fast_cells[i]).get_vm() - (*fast_cells[i - 1]).get_vm() - (*fast_cells[i + 1]).get_vm() - (*slow_cells[N_slow - 1]).get_vm());
+					cell_current +=
+						((*fast_cells[i + 1]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() + (*fast_cells[i + 1]).get_vm()) / 4;
+					cell_current +=
+						((*fast_cells[i + 1]).get_coupling_conductance() - (*slow_cells[N_slow - 1]).get_coupling_conductance()) * ((*slow_cells[N_slow - 1]).get_vm() + (*fast_cells[i + 1]).get_vm()) / 4;
+					cell_current +=
+						((*slow_cells[N_slow - 1]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() + (*slow_cells[N_slow - 1]).get_vm()) / 4;
+					if ((*fast_cells[i]).get_cell_type() == 2) {
+						//Due to different AMcell units
+						(*fast_cells[i]).set_i_stim(cell_current * 1000E9);
+					}
+					else {
+						(*fast_cells[i]).set_i_stim(cell_current);
+					}
+				}
+				else if (i != 0 && i != 224 && i != (N_fast - 1) && i != 74) {
+					double cell_current =
+						(*fast_cells[i]).get_coupling_conductance() * (2 * (*fast_cells[i]).get_vm() - (*fast_cells[i - 1]).get_vm() - (*fast_cells[i + 1]).get_vm());
+					cell_current +=
+						((*fast_cells[i + 1]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() - (*fast_cells[i + 1]).get_vm()) / 4;
+					if ((*fast_cells[i]).get_cell_type() == 2) {
+						(*fast_cells[i]).set_i_stim(cell_current * 1000E9);
+					}
+					else {
+						(*fast_cells[i]).set_i_stim(cell_current);
+					}
+				}
+				else if (i == N_fast - 1) {
+					//Ghost cell with same vm as i
+					double cell_current =
+						(*fast_cells[i]).get_coupling_conductance() * ((*fast_cells[i]).get_vm() - (*fast_cells[i - 1]).get_vm());
+					cell_current +=
+						((*fast_cells[i]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() - (*fast_cells[i]).get_vm()) / 4;
+					if ((*fast_cells[i]).get_cell_type() == 2) {
+						(*fast_cells[i]).set_i_stim(cell_current * 1000E9);
+					}
+					else {
+						(*fast_cells[i]).set_i_stim(cell_current);
+					}
+				}
+			}
 
+			//Loop over slow pathway
+			for (int i = 0; i < N_slow; i++) {
+				(*slow_cells[i]).set_i_stim(0);
+				(*slow_cells[i]).calc_i_all(time_step, solve_method, l);
+				if (i == 0){
+					double cell_current =
+						(*slow_cells)[i].get_coupling_conductance() * (2 * (*slow_cells)[i].get_vm() - (*fast_cells)[74].get_vm() - (*slow_cells)[i + 1].get_vm());
+					cell_current +=
+						((*slow_cells[i + 1]).get_coupling_conductance() - (*fast_cells[74]).get_coupling_conductance()) * ((*fast_cells[74]).get_vm() - (*slow_cells[i + 1]).get_vm()) / 4;
+					if ((*slow_cells[i]).get_cell_type() == 2) {
+						(*slow_cells[i]).set_i_stim(cell_current * 1000E9);
+					}
+					else {
+						(*slow_cells[i]).set_i_stim(cell_current);
+					}
+				}
+				else if (i == (N_slow - 1)) {
+					double cell_current =
+						(*slow_cells[i]).get_coupling_conductance() * (2 * (*slow_cells[i]).get_vm() - (*slow_cells[i - 1]).get_vm() - (*fast_cells[224]).get_vm());
+					cell_current +=
+						((*fast_cells[224]).get_coupling_conductance() - (*slow_cells[i - 1]).get_coupling_conductance()) * ((*slow_cells[i - 1]).get_vm() - (*fast_cells[224]).get_vm()) / 4;
+					double test = cell_current;
+					if ((*slow_cells[i]).get_cell_type() == 2) {
+						(*slow_cells[i]).set_i_stim(cell_current * 1000E9);
+					}
+					else {
+						(*slow_cells[i]).set_i_stim(cell_current);
+					}
+				}
+				else {
+					double cell_current =
+						(*slow_cells[i]).get_coupling_conductance() * (2 * (*slow_cells[i]).get_vm() - (*slow_cells[i - 1]).get_vm() - (*slow_cells[i + 1]).get_vm());
+					cell_current +=
+						((*slow_cells[i + 1]).get_coupling_conductance() - (*slow_cells[i - 1]).get_coupling_conductance()) * ((*slow_cells[i - 1]).get_vm() - (*slow_cells[i + 1]).get_vm()) / 4;
+					if (cell_current != 0) {
+						double test = 0;
+					}
+					if ((*slow_cells[i]).get_cell_type() == 2) {
+						(*slow_cells[i]).set_i_stim(cell_current * 1000E9);
+					}
+					else {
+						(*slow_cells[i]).set_i_stim(cell_current);
+					}
+				}
+			}
 
-		//first_AM_vm[array_counter] =(*fast_cells[1]).get_vm();
-		//AM_vm[array_counter] = (*fast_cells[74]).get_vm();
-		//SP_vm[array_counter] = (*slow_cells[137]).get_vm();
-		//FP_vm[array_counter] = (*fast_cells[174]).get_vm();
-		//SP_end_vm[array_counter] = (*slow_cells[N_slow -1]).get_vm();
-		//PB_vm[array_counter] = (*fast_cells[224]).get_vm();
-		//HB_vm[array_counter] = (*fast_cells[288]).get_vm();
-		//vm_array_atrium_start[array_counter] =(*fast_cells[0]).get_vm();
-		//vm_array_slow_start[array_counter] =(*slow_cells[75]).get_vm();
-		//vm_array_atrium_end[array_counter] =(*fast_cells[74]).get_vm();
-		//vm_array_slow_end[array_counter] =(*slow_cells[N_slow - 1]).get_vm();
-		//time_array[array_counter] = time;
+			for (int i = 0; i < N_fast; i++) {
+				(*fast_cells[i]).calc_vm(time_step, solve_method, i_bna_zero);
+			}
+			for (int i = 0; i < N_slow; i++) {
+				(*slow_cells[i]).calc_vm(time_step, solve_method, i_bna_zero);
+			}
 
-		//Printing progress
-	}
-	array_counter++;
+			if (array_counter % 2000 == 0) {
+				fast_cell_data << time << "\t";
+				for (int i = 0; i < N_fast / 5; i++) {
+					double AP_shifter = (*fast_cells[i * 5]).get_vm() - (0.01 * i);
+					fast_cell_data << AP_shifter << "\t";
+				}
+				slow_cell_data << time << "\t";
+				for (int i = 0; i < N_slow / 5; i++) {
+					double AP_shifter = (*slow_cells[i * 5]).get_vm() - (0.01 * i);
+					slow_cell_data << AP_shifter << "\t";
+				}
+				fast_cell_data << std::endl;
+				slow_cell_data << std::endl;
+			}
+		}
+		array_counter++;
 		double percent = time / sim_time;
 		for (double j = 1; j <= 10; j++) {
 			if ((j / 10) > percent - 0.000005 && (j /
 				10) < percent + 0.000005) {
-				if (percentages[j] == false) {
+				if (percentages[static_cast<int>(j)] == false) {
 					std::cout << "\n\n";
-					std::cout << j * 10 << "% complete"<<endl;
+					std::cout << j * 10 << "% complete" << std::endl;
 					std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-					std::cout << "Time for this 10 percent: " << std::chrono::duration_cast<std::chrono::minutes>(end - percent_start).count() << " [mins]" << ", or "<< std::chrono::duration_cast<std::chrono::seconds>(end - percent_start).count()<<" [secs]"<<endl;
-					std::cout << "Time for total simulation so far:  " << std::chrono::duration_cast<std::chrono::minutes> (end - sim_start).count() << " [mins]" << ", or " << std::chrono::duration_cast<std::chrono::seconds>(end - sim_start).count() << " [secs]" << endl;
-					percent_start= std::chrono::steady_clock::now();
-					percentages[j] = true;
-					total_time_taken = std::chrono::duration_cast<std::chrono::seconds>(end - sim_start).count();
+					std::cout << "Time for this 10 percent: " << std::chrono::duration_cast<std::chrono::minutes>(end - percent_start).count() << " [mins]" << ", or " << std::chrono::duration_cast<std::chrono::seconds>(end - percent_start).count() << " [secs]" << std::endl;
+					std::cout << "Time for total simulation so far:  " << std::chrono::duration_cast<std::chrono::minutes> (end - sim_start).count() << " [mins]" << ", or " << std::chrono::duration_cast<std::chrono::seconds>(end - sim_start).count() << " [secs]" << std::endl;
+					percent_start = std::chrono::steady_clock::now();
+					percentages[static_cast<int>(j)] = true;
+					total_time_taken = std::chrono::duration<double>(end - sim_start).count();
 				}
 			}
 		}
 		time += time_step;
 	}
 
-	std::cout << "\n\nSimulation complete! Time for total simulation: " << total_time_taken << " [secs]"<< endl;
-	std::cout << "Time per time step on average: " << total_time_taken / total_time_steps << " [secs]" << endl;
-
+	std::cout << "\n\nSimulation complete! Time for total simulation: " << total_time_taken << " [secs]" << std::endl;
+	std::cout << "Time per time step on average: " << total_time_taken / total_time_steps << " [secs]" << std::endl;
 
 	//Now export any parameters if necessary
-	cout << "\nNow exporting test cells for initialisation..." << endl;
+	std::cout << "\nNow exporting test cells for initialisation..." << std::endl;
 	for (int i{}; i < 4; i++) {
 		test_cells[i]->export_cell(i);
 	}
-	cout << "\nExport complete!" << endl;
-
-
-	double first_AM_activation_time = 0;
-	double AM_activation_time = 0; // Last AM cell (75th fastcell) before start of fast / slow pathways
-	double SP_activation_time = 0; // Middle (100th slow cell)slow pathway cell
-	double FP_activation_time = 0; // Middle (150th fast cell)fast pathway cell
-	double PB_activation_time = 0; // Start of penetratingbundle(first N cell after fast / slow pathway 226th fast cell)
-	double HB_activation_time = 0; // Middle (288th fast cell)His Bundle cell
-	double SP_end_activation_time = 0;
-	const double activationPoint = -30e-3; // Reference pointfor activation potential activation(mV)
-	bool first_AM_activated(false), AM_activated(false),SP_activated(false), FP_activated(false), PB_activated(false),HB_activated(false), SP_end_activated(false);
-	bool first_AM_over(false), AM_over(false), SP_over(false),FP_over(false), PB_over(false), HB_over(false), SP_end_over(false);
-	double startRecording = 0.775; // Ignore the first 0.775seconds until system reaches a steady state
-	bool successful = false;
-	int noStimsMeasure = 1;
-
-	/*
-	for (int i = 0; i < size; i++) {
-		if (time_array[i] > (deltaS * noStimsMeasure + 0.1)&& time_array[i] < (deltaS * (noStimsMeasure + 1) + 0.1)) {
-			if (HB_vm[i] > 0 && !successful) {
-				successful = true;
-			}
-		}
-	}
-	if (!successful) {
-		noStimsMeasure++;
-	}
-	for (int i = 0; i < size; i++) {
-		if (time_array[i] > (deltaS * noStimsMeasure) + 0.1) {
-			if (first_AM_vm[0] > activationPoint && !first_AM_over) {
-				if (first_AM_vm[i] <activationPoint) {
-					first_AM_over = true;
-				}
-				first_AM_activated = false;
-			}
-			else { first_AM_over = true; }
-			if (AM_vm[0] > activationPoint && !AM_over) {
-				if (AM_vm[i] < activationPoint) {
-					AM_over = true;
-				}
-				AM_activated = false;
-			}
-			else { AM_over = true; }
-			if (SP_vm[0] > activationPoint && !SP_over) {
-				if (SP_vm[i] < activationPoint) {
-					SP_over = true;
-				}
-				SP_activated = false;
-			}
-			else { SP_over = true; }
-			if (SP_end_vm[0] > activationPoint && !SP_end_over) {
-				if (SP_end_vm[i] <activationPoint) {
-					SP_end_over = true;
-				}
-				SP_end_activated = false;
-			}
-			else { SP_end_over = true; }
-			if (FP_vm[0] > activationPoint && !FP_over) {
-				if (FP_vm[i] < activationPoint) {
-					FP_over = true;
-				}
-				FP_activated = false;
-			}
-			else { FP_over = true; }
-			if (PB_vm[0] > activationPoint && !PB_over) {
-				if (PB_vm[i] < activationPoint) {
-					PB_over = true;
-				}
-				PB_activated = false;
-			}
-			else { PB_over = true; }
-			if (HB_vm[0] > activationPoint && !HB_over) {
-				if (HB_vm[i] < activationPoint) {
-					HB_over = true;
-				}
-				HB_activated = false;
-			}
-			else { HB_over = true; }
-			if (first_AM_vm[i] <= activationPoint &&first_AM_activated == false && first_AM_over) { // If membranepotential is less that activation potential store time
-				first_AM_activation_time =time_array[i];
-			}
-			else { first_AM_activated = true; } //Once membrane potential has passed activation point action potentialis activatedand will stop storing time
-			if (AM_vm[i] <= activationPoint &&AM_activated == false && AM_over) {
-				AM_activation_time =time_array[i];
-			}
-			else { AM_activated = true; }
-			if (SP_vm[i] <= activationPoint && SP_activated == false && SP_over) {
-				SP_activation_time =time_array[i];
-			}
-			else { SP_activated = true; }
-			if (SP_end_vm[i] <= activationPoint &&SP_end_activated == false && SP_end_over) {
-				SP_end_activation_time =time_array[i];
-			}
-			else { SP_end_activated = true; }
-			if (FP_vm[i] <= activationPoint &&FP_activated == false && FP_over) {
-				FP_activation_time =time_array[i];
-			}
-			else { FP_activated = true; }
-			if (PB_vm[i] <= activationPoint &&PB_activated == false && PB_over) {
-				PB_activation_time =time_array[i];
-			}
-			else { PB_activated = true; }
-			if (HB_vm[i] <= activationPoint &&HB_activated == false && HB_over) {
-				HB_activation_time =time_array[i];
-			}
-			else { HB_activated = true; }
-		}
-	}
-	*/
-	cout << "Activation time of first AM cell = " <<first_AM_activation_time * 1000 - first_AM_activation_time * 1000 <<" ms\n";
-	std::cout << "Activation time of last AM cell = " <<
-		AM_activation_time * 1000 - first_AM_activation_time * 1000 << "ms\n";
-	std::cout << "Activation time of middle fast cell = " <<
-		FP_activation_time * 1000 - first_AM_activation_time * 1000 << "ms\n";
-	std::cout << "Activation time of middle slow cell = " <<
-		SP_activation_time * 1000 - first_AM_activation_time * 1000 << "ms\n";
-	std::cout << "Activation time of end of slow pathway = " <<
-		SP_end_activation_time * 1000 - first_AM_activation_time * 1000 << "ms\n";
-	std::cout << "Activation time of first penetrating bundlecell = " << PB_activation_time * 1000 - first_AM_activation_time *
-		1000 << " ms\n";
-	std::cout << "Activation time of middle His bundle cell = "
-		<< HB_activation_time * 1000 - first_AM_activation_time * 1000 << "ms\n";
-	std::cout << "Atrial conduction velocity = " << ((7.5e-3) /
-		(AM_activation_time - first_AM_activation_time)) * 1e2 << "cm/s" <<
-		std::endl;
-	std::cout << "Slow pathway conduction velocity = " <<
-		((20e-3) / (SP_end_activation_time - AM_activation_time)) * 1e2 <<
-		"cm/s or " << ((2e-3) / (SP_end_activation_time -
-			AM_activation_time)) * 1e2 << "cm/s" << std::endl << std::endl;
-	std::cout << "Fast pathway conduction velocity = " <<
-		((15e-3) / (PB_activation_time - AM_activation_time)) * 1e2 << "cm/sor " << ((1.5e-3) / (PB_activation_time - AM_activation_time)) * 1e2
-		<< "cm/s" << std::endl << std::endl;
-	std::cout << "\n\n\nEND OF SIMULATION\n";
-	std::cout << "enter...";
-	std::cin >> ws;
-	_fcloseall;
+	std::cout << "\nExport complete!" << std::endl;
+	std::cout << "\n\n\nEND OF SIMULATION\n\n\n";
 }

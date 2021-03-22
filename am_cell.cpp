@@ -1,31 +1,36 @@
+/*--------------------------------------------------------------------
+-------- -
+AM Cell Action Potential Model
+21 / 03 / 2021 Modified by Noah PHIPPS (Removing depreceated C style code, optimising functions, formatting, generally rewritten)
+22 / 03 / 2021 Rewritten by Noah PHIPPS (Created functions for currents)
+--------------------------------------------------------------------
+------ */
 #include "am_cell.h"
 #include<string>
+#include<fstream>
 #include<vector>
 #include <iostream>
-using namespace std;
 am_cell::am_cell(int version) {
 
 	initialise();
 
-	string filename{ "am_export_" };
-	filename.append(to_string(version));
-	filename.append(".txt");
-	FILE* import_file = fopen(filename.c_str(), "rt");
+	std::string filename{ import_file_prefix };
+	filename.append(std::to_string(version));
+	filename.append(all_files_suffix);
 	double* import_parameters = new double[45];
-	if (import_file == NULL) {
-		cout << "Error: Cannot import cell...";
-	}
+	std::ifstream input_file{ filename };
 	for (int i = 0; i < 45; i++)
 	{
-
-		if (fscanf(import_file, "%lf", &import_parameters[i]) == EOF)
-		{
-			std::cout << import_parameters[i] << std::endl;
-			fclose(import_file);
-			printf("Cannot read parameter file\n");
-			exit(1);
+		try {
+			std::string new_value;
+			getline(input_file, new_value);
+			import_parameters[i] = std::stod(new_value);
+		}
+		catch (...) {
+			std::cout << "error";
 		}
 	}
+	input_file.close();
 	n = import_parameters[0];
 	r1 = import_parameters[1];
 	s1 = import_parameters[2];
@@ -75,12 +80,11 @@ am_cell::am_cell(int version) {
 
 }
 
-void am_cell::export_cell(int version){
-	string filename{ "am_export_" };
-	filename.append(to_string(version));
-	filename.append(".txt");
-	FILE* export_file = fopen(filename.c_str(), "w");
-	double* import_parameters = new double[45];
+void am_cell::export_cell(int version) {
+	std::string filename{ "am_export_" };
+	filename.append(std::to_string(version));
+	filename.append(all_files_suffix);
+	std::ofstream output_file{ filename };
 	double* export_parameters = new double[45];
 	export_parameters[0] = n;
 	export_parameters[1] = r1;
@@ -130,43 +134,75 @@ void am_cell::export_cell(int version){
 	export_parameters[44] = get_coupling_conductance();
 
 	for (int i{}; i < 45; i++) {
-		if (export_file == NULL) {
-			cout << "Error: Cannot export cell...";
-		}
-		fprintf(export_file, "%g\t", export_parameters[i]);
+		output_file << export_parameters[i];
 		if (i != 44) {
-			fprintf(export_file, "\n");
+			output_file << std::endl;
 		}
 	}
-	fflush(export_file);
-	fclose(export_file);
-	}
+	output_file.close();
+}
 
+void am_cell::print_currents(std::ofstream& output_file, double time, int cell_type) {
+	output_file << cell_type << "\t" << time << "\t" << INa << "\t" << IK << "\t" << Ik1 << "\t" << Ito << "\t" << INaCa << "\t" << Ip << "\t" << Ib << "\t" << ICap << "\t" << ICaL << "\t" << ICaT << "\t" << Isus << std::endl;
+}
 
 double am_cell::get_total_ion(bool i_bna_zero) {
-	double I = ((INa + IK + Ik1 + Ito + INaCa + Ip + Ib + ICap + ICaL + ICaT + Isus));
-	if (i_bna_zero) {
-		I -= i_b_na;
-	}
-	return I;
+	//double I = ((INa + IK + Ik1 + Ito + INaCa + Ip + Ib + ICap + ICaL + ICaT + Isus));
+	//if (i_bna_zero) {
+	//	I -= i_b_na;
+	//}
+	return (INa + IK + Ik1 + Ito + INaCa + Ip + Ib + ICap + ICaL + ICaT + Isus);
 }
+
 void am_cell::calc_i_all(double time_step, int solve_method, int l) {
-	////Variable Declarations////
+	calc_INa(time_step, solve_method);
+	calc_IK(time_step, solve_method);
+	calc_Ik1(time_step, solve_method);
+	calc_Ito(time_step, solve_method);
+	calc_INaCa(time_step, solve_method);
+	calc_Ip(time_step, solve_method);
+	calc_Ib(time_step, solve_method);
+	calc_ICap(time_step, solve_method);
+	calc_ICaL(time_step, solve_method);
+	calc_ICaT(time_step, solve_method);
+	calc_Isus(time_step, solve_method);
+	calc_i_b_na(time_step, solve_method);
+}
+
+void am_cell::calc_INa(double time_step, int solve_method) {
+	double alpha_m, beta_m, m_inf, tau_m;
+	double alpha_h, beta_h, h_inf, tau_h1, tau_h2;
+	double vm_mv = get_vm() * 1000;
+	//INa
+	if (fabs(vm_mv + 44.4) < 0.0001) {
+		alpha_m = 460. * 12.673;
+	}
+	else {
+		alpha_m = -460 * (vm_mv + 44.4) / (exp(-(vm_mv + 44.4) / 12.673) - 1);
+	}
+	beta_m = 18400.0 * exp(-(vm_mv + 44.4) / 12.673);
+	m_inf = alpha_m / (alpha_m + beta_m);
+	tau_m = 1000 / (alpha_m + beta_m);
+	m += HT * (m_inf - m) / tau_m;
+	alpha_h = 44.9 * exp(-(vm_mv + 66.9) / 5.57);
+	beta_h = 1491.0 / (1 + 323.3 * exp(-(vm_mv + 94.6) / 12.9));
+	tau_h1 = 1000 * (0.03 / (1 + exp((vm_mv + 40) / 6.0)) + 0.00015);
+	tau_h2 = 1000 * (0.12 / (1 + exp((vm_mv + 60) / 2.0)) + 0.00045);
+	h_inf = alpha_h / (alpha_h + beta_h);
+	h1 += HT * (h_inf - h1) / tau_h1;
+	h2 += HT * (h_inf - h2) / tau_h2;
+	if (fabs(vm_mv) > 0.0001) {
+		INa = get_g_na() * 0.0014 * pow(m, 3) * (0.635 * h1 + 0.365 * h2) * 140 * vm_mv * (F / RTF) * (exp((vm_mv - ENa) / RTF) - 1) / (exp(vm_mv / RTF) - 1); // 0.75 - for instant activation !
+	}
+	else {
+		INa = get_g_na() * 0.0014 * pow(m, 3) * (0.635 * h1 + 0.365 * h2) * 140 * F * (exp((vm_mv - ENa) / RTF) - 1);
+	}
+}
+void am_cell::calc_IK(double time_step, int solve_method) {
 	double alpha_pa, beta_pa, pa_inf, tau_pa;
 	double alpha_pi, beta_pi, pi_inf, tau_pi;
 	double alpha_n, beta_n, n_inf, tau_n;
-	double alpha_r, beta_r, r_inf, tau_r;
-	double s1_inf, tau_s1, s2_inf, tau_s2, s3_inf, tau_s3;
-	double alpha_m, beta_m, m_inf, tau_m;
-	double alpha_h, beta_h, h_inf, tau_h1, tau_h2;
-	double alpha_dl, beta_dl, dl_inf, tau_dl;
-	double alpha_fl, beta_fl, fl_inf, tau_fl;
-	double alpha_dt, beta_dt, dt_inf, tau_dt;
-	double alpha_ft, beta_ft, ft_inf, tau_ft;
-	////Kinetics + Calculations////
 	double vm_mv = get_vm() * 1000;
-	//E0
-	double E0 = vm_mv - EK + 3.6;
 	//IKf
 	alpha_pa = 9.0 * exp(vm_mv / 25.371);
 	beta_pa = 1.3 * exp(-vm_mv / 13.026);
@@ -184,6 +220,20 @@ void am_cell::calc_i_all(double time_step, int solve_method, int l) {
 	n_inf = 1.0 / (1 + exp(-(vm_mv - 0.9) / 13.8));
 	tau_n = 1000 * (1. / (alpha_n + beta_n) + 0.06);
 	n += HT * (n_inf - n) / tau_n;
+	double IKs, IKf;
+	IKs = G_Ks * n * (vm_mv - EK);
+	IKf = 3.5 * Pa * Pi * (vm_mv - EK); //ikr = 0 sometimes!
+	IK = IKf + IKs;
+}
+void am_cell::calc_Ik1(double time_step, int solve_method) {
+	double vm_mv = get_vm() * 1000;
+	double E0 = vm_mv - EK + 3.6;
+	Ik1 = get_g_k1() * pow(KIono / (KIono + 0.59), 3) * (vm_mv - EK) / (1 + exp(1.393 * E0 / RTF));
+}
+void am_cell::calc_Ito(double time_step, int solve_method) {
+	double alpha_r, beta_r, r_inf, tau_r;
+	double s1_inf, tau_s1, s2_inf, tau_s2, s3_inf, tau_s3;
+	double vm_mv = get_vm() * 1000;
 	//Ito
 	alpha_r = 386.6 * exp(vm_mv / 12.0);
 	beta_r = 8.011 * exp(-vm_mv / 7.2);
@@ -199,24 +249,28 @@ void am_cell::calc_i_all(double time_step, int solve_method, int l) {
 	s3_inf = ((1. / (1 + exp((vm_mv + 50.67) / 27.38))) + 0.666) / 1.666;
 	tau_s3 = 1000 * ((7.5 / (1 + exp((vm_mv + 23.0) / 0.5))) + 0.5);
 	s3 += HT * (s3_inf - s3) / tau_s3;
-	//INa
-	if (fabs(vm_mv + 44.4) < 0.0001) {
-		alpha_m = 460. * 12.673;
-	}
-	else {
-		alpha_m = -460 * (vm_mv + 44.4) / (exp(-(vm_mv +44.4) / 12.673) - 1);
-	}
-	beta_m = 18400.0 * exp(-(vm_mv + 44.4) / 12.673);
-	m_inf = alpha_m / (alpha_m + beta_m);
-	tau_m = 1000 / (alpha_m + beta_m);
-	m += HT * (m_inf - m) / tau_m;
-	alpha_h = 44.9 * exp(-(vm_mv + 66.9) / 5.57);
-	beta_h = 1491.0 / (1 + 323.3 * exp(-(vm_mv + 94.6) / 12.9));
-	tau_h1 = 1000 * (0.03 / (1 + exp((vm_mv + 40) / 6.0)) + 0.00015);
-	tau_h2 = 1000 * (0.12 / (1 + exp((vm_mv + 60) / 2.0)) + 0.00045);
-	h_inf = alpha_h / (alpha_h + beta_h);
-	h1 += HT * (h_inf - h1) / tau_h1;
-	h2 += HT * (h_inf - h2) / tau_h2;
+	Ito = get_g_to() * r1 * (0.590 * pow(s1, 3) + 0.410 * pow(s2, 3)) * (0.600 * pow(s3, 6) + 0.4) * (vm_mv - EK); // CT - 0.2, PM - 0.35
+
+}
+void am_cell::calc_INaCa(double time_step, int solve_method) {
+	double vm_mv = get_vm() * 1000;
+	INaCa = get_g_naca() * (((NaIoni * NaIoni * NaIoni) * 2.5 * exp(0.450 * vm_mv / RTF) - (140.0 * 140.0 * 140.0) * CaIoni * exp(vm_mv * (0.45 - 1) / RTF)) / (1 + 0.0003 * (CaIoni * (140.0 * 140.0 * 140.0) + 2.5 * (NaIoni * NaIoni * NaIoni))));
+}
+void am_cell::calc_Ip(double time_step, int solve_method) {
+	double vm_mv = get_vm() * 1000;
+	Ip = get_g_nak() * KIono / (KIono + 1) * (pow(NaIoni, 1.5) / (pow(NaIoni, 1.5) + pow(11, 1.5))) * (1.6 / (1.5 + exp(-(vm_mv + 60) / 40.)));
+}
+void am_cell::calc_Ib(double time_step, int solve_method) {
+	double vm_mv = get_vm() * 1000;
+	Ib = get_g_b_na() * (vm_mv - ENa) + get_g_b_ca() * (vm_mv - ECa) + Gb_Cl * (vm_mv - ECl); // 0.02 - CT, 0.03 - PM
+}
+void am_cell::calc_ICap(double time_step, int solve_method) {
+	ICap = G_Cap_MAX * (CaIoni / (CaIoni + 0.002));
+}
+void am_cell::calc_ICaL(double time_step, int solve_method) {
+	double alpha_dl, beta_dl, dl_inf, tau_dl;
+	double alpha_fl, beta_fl, fl_inf, tau_fl;
+	double vm_mv = get_vm() * 1000;
 	//ICaL
 	vm_mv += 10;
 	alpha_dl = -16.72 * (vm_mv + 35) / (exp(-(vm_mv + 35) / 2.5) - 1) - 50.0 * vm_mv / (exp(-vm_mv / 4.808) - 1);
@@ -246,7 +300,13 @@ void am_cell::calc_i_all(double time_step, int solve_method, int l) {
 	fl_inf = alpha_fl / (alpha_fl + beta_fl);
 	tau_fl = 1000.0 / (alpha_fl + beta_fl);
 	fL += HT * (fl_inf - fL) / tau_fl;
-	vm_mv += 10;
+	vm_mv += 20;
+	ICaL = get_g_ca() * (dL * fL + 1.0 / (1 + exp(-(vm_mv - 33.0) / 12.0))) * (vm_mv - 60);
+}
+void am_cell::calc_ICaT(double time_step, int solve_method) {
+	double alpha_dt, beta_dt, dt_inf, tau_dt;
+	double alpha_ft, beta_ft, ft_inf, tau_ft;
+	double vm_mv = get_vm() * 1000;
 	//ICaT
 	alpha_dt = 674.173 * exp((vm_mv + 23.3) / 30.);
 	beta_dt = 674.173 * exp(-(vm_mv + 23.3) / 30.);
@@ -258,29 +318,13 @@ void am_cell::calc_i_all(double time_step, int solve_method, int l) {
 	tau_ft = 1000.0 / (alpha_ft + beta_ft);
 	ft_inf = alpha_ft / (alpha_ft + beta_ft);
 	fT += HT * (ft_inf - fT) / tau_ft;
-	//i_bNa
-	i_b_na = get_P_na() * vm_mv * ((pow(F, 2.0)) / (R * 1000 * T)) * ((NaIoni - ((NaIono)*exp(-(F * vm_mv) / (R * 1000 * T)))) / (1 - (exp(-(vm_mv * F) / (R * 1000 * T)))));
-	////CURRENT FORUMLATION////
-	double IKs, IKf;
-	IKs = G_Ks * n * (vm_mv - EK);
-	IKf = 3.5 * Pa * Pi * (vm_mv - EK); //ikr = 0 sometimes!dont understand why yet!ask!!
-	IK = IKf + IKs;
-	Isus = 1.3 * (vm_mv + 70);
-	Ik1 = get_g_k1() * pow(KIono / (KIono + 0.59), 3) * (vm_mv - EK) / (1 + exp(1.393 * E0 / RTF));
-	Ito = get_g_to() * r1 * (0.590 * pow(s1, 3) + 0.410 * pow(s2, 3)) * (0.600 * pow(s3, 6) + 0.4) * (vm_mv - EK); // CT - 0.2, PM - 0.35
-	Ip = get_g_nak() * KIono / (KIono + 1) * (pow(NaIoni, 1.5) / (pow(NaIoni, 1.5) + pow(11, 1.5))) * (1.6 / (1.5 + exp(-(vm_mv + 60) / 40.)));
-	INaCa = get_g_naca() * (((NaIoni * NaIoni * NaIoni) * 2.5 * exp(0.450 * vm_mv / RTF) - (140 * 140 * 140) * CaIoni * exp(vm_mv * (0.45 - 1) / RTF)) / (1 + 0.0003 * (CaIoni * (140 * 140 * 140) + 2.5 * (NaIoni * NaIoni * NaIoni))));
-	double test = get_g_naca();
-	if (fabs(vm_mv) > 0.0001) {
-		INa = get_g_na() * 0.0014 * pow(m, 3) * (0.635 * h1 + 0.365 * h2) * 140 * vm_mv * (F / RTF) * (exp((vm_mv - ENa) / RTF) - 1) / (exp(vm_mv / RTF) - 1); // 0.75 - for instant activation !
-	}
-	else {
-		INa = get_g_na() * 0.0014 * pow(m, 3) * (0.635 * h1 + 0.365 * h2) * 140 * F * (exp((vm_mv - ENa) / RTF) - 1);
-	}
-	Ib = get_g_b_na() * (vm_mv - ENa) + get_g_b_ca() * (vm_mv - ECa) + Gb_Cl * (vm_mv - ECl); // 0.02 - CT, 0.03 - PM
-	ICap = G_Cap_MAX * (CaIoni / (CaIoni + 0.002));
-	vm_mv += 10;
-	ICaL = get_g_ca() * (dL * fL + 1.0 / (1 + exp(-(vm_mv - 33.0) / 12.0))) * (vm_mv - 60);
-	vm_mv -= 10;
 	ICaT = G_CaT * dT * fT * (vm_mv - 38.0);
+}
+void am_cell::calc_Isus(double time_step, int solve_method) {
+	double vm_mv = get_vm() * 1000;
+	Isus = 1.3 * (vm_mv + 70);
+}
+void am_cell::calc_i_b_na(double time_step, int solve_method) {
+	double vm_mv = get_vm() * 1000;
+	i_b_na = get_P_na() * vm_mv * ((pow(F, 2.0)) / (R * 1000 * T)) * ((NaIoni - ((NaIono)*exp(-(F * vm_mv) / (R * 1000 * T)))) / (1 - (exp(-(vm_mv * F) / (R * 1000 * T)))));
 }
