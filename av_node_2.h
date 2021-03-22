@@ -178,7 +178,7 @@ public:
 	}
 	void calc_i_all(double time_step, int solve_method, int l)
 	{ //l added for ACh present current alterations
-		calc_na(time_step, solve_method);//ERROR
+		calc_na(time_step, solve_method);
 		calc_l(time_step, solve_method);
 		calc_to(time_step, solve_method);
 		calc_kr(time_step, solve_method);

@@ -27,7 +27,8 @@ am_cell::am_cell(int version) {
 			import_parameters[i] = std::stod(new_value);
 		}
 		catch (...) {
-			std::cout << "error";
+			std::cout << "Error, cannot read data when importing am_cell parameters...";
+			exit(1);
 		}
 	}
 	input_file.close();

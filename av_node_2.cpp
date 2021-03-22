@@ -43,7 +43,8 @@ void av_node_2::initalise_avn(int cell_type) {
 			cell_parameters[j] = std::stod(new_value);
 		}
 		catch (...) {
-			std::cout << "error";
+			std::cout << "Error, cannot read data when initialising AVN cell...";
+			exit(1);
 		}
 	}
 	input_file.close();
@@ -129,7 +130,8 @@ av_node_2::av_node_2(int cell_type, int version) {
 			import_parameters[i] = std::stod(new_value);
 		}
 		catch (...) {
-			std::cout << "error";
+			std::cout << "Error, cannot import AVN cell parameters...";
+			exit(1);
 		}
 	}
 	input_file.close();

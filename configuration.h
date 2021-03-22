@@ -14,6 +14,7 @@ AVN Model Configuration File
 //All declared as externals here, configure in the .cpp file
 
 extern bool run_in_remote_configuration;
+extern bool allow_test_cells;
 extern double sim_time;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
 extern double start_record; //Start recording to file once time is greater than this //40 for N, 3.6 for NH//9 for AN
 extern bool allow_main_simulation;

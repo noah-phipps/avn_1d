@@ -120,7 +120,6 @@ int main() {
 
 	std::cout << "Beginning cell initialisation..." << std::endl;
 	//Initialise array of cells, slow and fast pathway
-	std::cout << N_fast;
 	cell_base** fast_cells = new cell_base * [N_fast];
 	cell_base** slow_cells = new cell_base * [N_slow];
 	cell_base** test_cells = new cell_base * [4];
@@ -341,39 +340,41 @@ int main() {
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//Do the test cells simulation here
-		for (int i{}; i < 4; i++) {
-			if (stimulate_test_cells == false) {
-				(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
-				(*test_cells[i]).calc_vm(time_step, solve_method, false);
-			}
-			else {
-				if (time >= test_cell_stim_counter[i] * test_cell_stim_interval) {
-					(*test_cells[i]).set_i_stim(stim_current);
-					if (i == 0) {
-						(*test_cells[i]).set_i_stim(stim_current * 2.5E12);
-					}
-					if (time >= test_stim_duration + (test_cell_stim_counter[i] * test_cell_stim_interval)) {
-						(*test_cells[i]).set_i_stim(0);
-						(test_cell_stim_counter[i]) += 1;
-					}
+		if (allow_test_cells == true) {
+			for (int i{}; i < 4; i++) {
+				if (stimulate_test_cells == false) {
+					(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+					(*test_cells[i]).calc_vm(time_step, solve_method, false);
 				}
-				(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
-				(*test_cells[i]).calc_vm(time_step, solve_method, false);
+				else {
+					if (time >= test_cell_stim_counter[i] * test_cell_stim_interval) {
+						(*test_cells[i]).set_i_stim(stim_current);
+						if (i == 0) {
+							(*test_cells[i]).set_i_stim(stim_current * 2.5E12);
+						}
+						if (time >= test_stim_duration + (test_cell_stim_counter[i] * test_cell_stim_interval)) {
+							(*test_cells[i]).set_i_stim(0);
+							(test_cell_stim_counter[i]) += 1;
+						}
+					}
+					(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+					(*test_cells[i]).calc_vm(time_step, solve_method, false);
+				}
 			}
-		}
 
-		if (array_counter % 2000 == 0) {
-			//cout << "array counter is " << array_counter << endl;
-			test_cell_data << time << "\t";
-			for (int i = 0; i < 4; i++) {
-				test_cell_data << (*test_cells[i]).get_vm() << "\t";
+			if (array_counter % 2000 == 0) {
+				//cout << "array counter is " << array_counter << endl;
+				test_cell_data << time << "\t";
+				for (int i = 0; i < 4; i++) {
+					test_cell_data << (*test_cells[i]).get_vm() << "\t";
+				}
+				(*test_cells[0]).print_currents(am_test_currents, time, 2);
+				(*test_cells[1]).print_currents(n_test_currents, time, 1);
+				(*test_cells[2]).print_currents(an_test_currents, time, 16);
+				(*test_cells[3]).print_currents(nh_test_currents, time, 19);
+				am_test_stim_current << time << "\t" << (*test_cells[0]).get_i_stim() << std::endl;
+				test_cell_data << std::endl;
 			}
-			(*test_cells[0]).print_currents(am_test_currents, time, 2);
-			(*test_cells[1]).print_currents(n_test_currents, time, 1);
-			(*test_cells[2]).print_currents(an_test_currents, time, 16);
-			(*test_cells[3]).print_currents(nh_test_currents, time, 19);
-			am_test_stim_current << time << "\t" << (*test_cells[0]).get_i_stim() << std::endl;
-			test_cell_data << std::endl;
 		}
 		//end test cells simulation
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -391,11 +392,11 @@ int main() {
 			}
 			//Loop over fast pathway
 			for (int i = 0; i < N_fast; i++) {
-				(*fast_cells[i]).set_i_stim(0);
+				(*fast_cells[i]).set_i_stim(0.0);
 				(*fast_cells[i]).calc_i_all(time_step, solve_method, l);
 				bool stim = false;
 				if (i == 0) {
-					double cell_current = (*fast_cells)[i].get_coupling_conductance() * ((*fast_cells)[i].get_vm() - (*fast_cells)[i + 1].get_vm());
+					double cell_current = (*fast_cells[i]).get_coupling_conductance() * ((*fast_cells[i]).get_vm() - (*fast_cells[i + 1]).get_vm());
 					if ((*fast_cells[i]).get_cell_type() == 2) {
 						(*fast_cells[i]).set_i_stim(stim_current * 2.5E12);
 					}
@@ -470,8 +471,8 @@ int main() {
 				(*slow_cells[i]).set_i_stim(0);
 				(*slow_cells[i]).calc_i_all(time_step, solve_method, l);
 				if (i == 0){
-					double cell_current =
-						(*slow_cells)[i].get_coupling_conductance() * (2 * (*slow_cells)[i].get_vm() - (*fast_cells)[74].get_vm() - (*slow_cells)[i + 1].get_vm());
+					double cell_current = (*slow_cells[i]).get_coupling_conductance();
+					cell_current *= (2 * (*slow_cells[i]).get_vm() - (*fast_cells[74]).get_vm() - (*slow_cells[i + 1]).get_vm());
 					cell_current +=
 						((*slow_cells[i + 1]).get_coupling_conductance() - (*fast_cells[74]).get_coupling_conductance()) * ((*fast_cells[74]).get_vm() - (*slow_cells[i + 1]).get_vm()) / 4;
 					if ((*slow_cells[i]).get_cell_type() == 2) {
