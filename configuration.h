@@ -54,4 +54,10 @@ extern double test_cell_stim_interval;
 extern double test_stim_duration;
 extern std::string import_file_prefix;
 extern std::string all_files_suffix;
+extern bool allow_am;
+extern bool allow_an;
+extern bool allow_nh;
+extern bool allow_n;
+extern double am_cell_unit_multiplier;
+extern double am_cell_stim_multiplier;
 #endif

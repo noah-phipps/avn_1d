@@ -123,19 +123,23 @@ int main() {
 	cell_base** fast_cells = new cell_base * [N_fast];
 	cell_base** slow_cells = new cell_base * [N_slow];
 	cell_base** test_cells = new cell_base * [4];
-
+	bool test_cells_allowed[4];
 	//Now generate cells just to test them; am, n, an, nh
 	am_cell* test_am_cell = new am_cell();
 	test_cells[0] = test_am_cell;
+	test_cells_allowed[0] = allow_am;
 
 	av_node_2* test_n_cell = new av_node_2(1, 1);
 	test_cells[1] = test_n_cell;
+	test_cells_allowed[1] = allow_n;
 
 	av_node_2* test_an_cell = new av_node_2(16, 2);
 	test_cells[2] = test_an_cell;
+	test_cells_allowed[2] = allow_an;
 
 	av_node_2* test_nh_cell = new av_node_2(19, 3);
 	test_cells[3] = test_nh_cell;
+	test_cells_allowed[3] = allow_nh;
 
 	//Set i stim for test cells to be 0 when starting
 	for (int i{}; i < 4; i++) {
@@ -342,23 +346,25 @@ int main() {
 		//Do the test cells simulation here
 		if (allow_test_cells == true) {
 			for (int i{}; i < 4; i++) {
-				if (stimulate_test_cells == false) {
-					(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
-					(*test_cells[i]).calc_vm(time_step, solve_method, false);
-				}
-				else {
-					if (time >= test_cell_stim_counter[i] * test_cell_stim_interval) {
-						(*test_cells[i]).set_i_stim(stim_current);
-						if (i == 0) {
-							(*test_cells[i]).set_i_stim(stim_current * 2.5E12);
-						}
-						if (time >= test_stim_duration + (test_cell_stim_counter[i] * test_cell_stim_interval)) {
-							(*test_cells[i]).set_i_stim(0);
-							(test_cell_stim_counter[i]) += 1;
-						}
+				if (test_cells_allowed[i] == true) {
+					if (stimulate_test_cells == false) {
+						(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+						(*test_cells[i]).calc_vm(time_step, solve_method, false);
 					}
-					(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
-					(*test_cells[i]).calc_vm(time_step, solve_method, false);
+					else {
+						if (time >= test_cell_stim_counter[i] * test_cell_stim_interval) {
+							(*test_cells[i]).set_i_stim(stim_current);
+							if (i == 0) {
+								(*test_cells[i]).set_i_stim(stim_current * am_cell_unit_multiplier * am_cell_stim_multiplier);
+							}
+							if (time >= test_stim_duration + (test_cell_stim_counter[i] * test_cell_stim_interval)) {
+								(*test_cells[i]).set_i_stim(0);
+								(test_cell_stim_counter[i]) += 1;
+							}
+						}
+						(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+						(*test_cells[i]).calc_vm(time_step, solve_method, false);
+					}
 				}
 			}
 
@@ -385,7 +391,7 @@ int main() {
 			}
 			stim_current = 0;
 			//control stim time
-			for (int noStim = 0; noStim < 20; noStim++) {
+			for (int noStim = 0; noStim < 200; noStim++) {
 				if (time > (0.1 + noStim * deltaS) && time < (0.1 + noStim * deltaS) + stim_time) {
 					stim_current = -1.2e-9;
 				}
@@ -398,7 +404,7 @@ int main() {
 				if (i == 0) {
 					double cell_current = (*fast_cells[i]).get_coupling_conductance() * ((*fast_cells[i]).get_vm() - (*fast_cells[i + 1]).get_vm());
 					if ((*fast_cells[i]).get_cell_type() == 2) {
-						(*fast_cells[i]).set_i_stim(stim_current * 2.5E12);
+						(*fast_cells[i]).set_i_stim(stim_current * am_cell_stim_multiplier * am_cell_unit_multiplier);
 					}
 					else {
 						(*fast_cells[i]).set_i_stim(stim_current);
@@ -416,7 +422,7 @@ int main() {
 						(((*slow_cells[0]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() - (*slow_cells[0]).get_vm())) / 4;
 					if ((*fast_cells[i]).get_cell_type() == 2) {
 						//Due to different AMcell units
-						(*fast_cells[i]).set_i_stim(cell_current * 1000E9);
+						(*fast_cells[i]).set_i_stim(cell_current * am_cell_unit_multiplier);
 					}
 					else {
 						(*fast_cells[i]).set_i_stim(cell_current);
@@ -433,7 +439,7 @@ int main() {
 						((*slow_cells[N_slow - 1]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() + (*slow_cells[N_slow - 1]).get_vm()) / 4;
 					if ((*fast_cells[i]).get_cell_type() == 2) {
 						//Due to different AMcell units
-						(*fast_cells[i]).set_i_stim(cell_current * 1000E9);
+						(*fast_cells[i]).set_i_stim(cell_current * am_cell_unit_multiplier);
 					}
 					else {
 						(*fast_cells[i]).set_i_stim(cell_current);
@@ -445,7 +451,7 @@ int main() {
 					cell_current +=
 						((*fast_cells[i + 1]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() - (*fast_cells[i + 1]).get_vm()) / 4;
 					if ((*fast_cells[i]).get_cell_type() == 2) {
-						(*fast_cells[i]).set_i_stim(cell_current * 1000E9);
+						(*fast_cells[i]).set_i_stim(cell_current * am_cell_unit_multiplier);
 					}
 					else {
 						(*fast_cells[i]).set_i_stim(cell_current);
@@ -458,7 +464,7 @@ int main() {
 					cell_current +=
 						((*fast_cells[i]).get_coupling_conductance() - (*fast_cells[i - 1]).get_coupling_conductance()) * ((*fast_cells[i - 1]).get_vm() - (*fast_cells[i]).get_vm()) / 4;
 					if ((*fast_cells[i]).get_cell_type() == 2) {
-						(*fast_cells[i]).set_i_stim(cell_current * 1000E9);
+						(*fast_cells[i]).set_i_stim(cell_current * am_cell_unit_multiplier);
 					}
 					else {
 						(*fast_cells[i]).set_i_stim(cell_current);
@@ -476,7 +482,7 @@ int main() {
 					cell_current +=
 						((*slow_cells[i + 1]).get_coupling_conductance() - (*fast_cells[74]).get_coupling_conductance()) * ((*fast_cells[74]).get_vm() - (*slow_cells[i + 1]).get_vm()) / 4;
 					if ((*slow_cells[i]).get_cell_type() == 2) {
-						(*slow_cells[i]).set_i_stim(cell_current * 1000E9);
+						(*slow_cells[i]).set_i_stim(cell_current * am_cell_unit_multiplier);
 					}
 					else {
 						(*slow_cells[i]).set_i_stim(cell_current);
@@ -489,7 +495,7 @@ int main() {
 						((*fast_cells[224]).get_coupling_conductance() - (*slow_cells[i - 1]).get_coupling_conductance()) * ((*slow_cells[i - 1]).get_vm() - (*fast_cells[224]).get_vm()) / 4;
 					double test = cell_current;
 					if ((*slow_cells[i]).get_cell_type() == 2) {
-						(*slow_cells[i]).set_i_stim(cell_current * 1000E9);
+						(*slow_cells[i]).set_i_stim(cell_current * am_cell_unit_multiplier);
 					}
 					else {
 						(*slow_cells[i]).set_i_stim(cell_current);
@@ -504,7 +510,7 @@ int main() {
 						double test = 0;
 					}
 					if ((*slow_cells[i]).get_cell_type() == 2) {
-						(*slow_cells[i]).set_i_stim(cell_current * 1000E9);
+						(*slow_cells[i]).set_i_stim(cell_current * am_cell_unit_multiplier);
 					}
 					else {
 						(*slow_cells[i]).set_i_stim(cell_current);
