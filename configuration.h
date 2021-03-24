@@ -60,4 +60,7 @@ extern bool allow_nh;
 extern bool allow_n;
 extern double am_cell_unit_multiplier;
 extern double am_cell_stim_multiplier;
+extern bool analyse_indivdial_cell;
+extern int individual_cell_index;
+extern double first_stim_time;
 #endif

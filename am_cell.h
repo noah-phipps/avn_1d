@@ -9,7 +9,7 @@ AM Cell Action Potential Model
 #include <math.h>
 #include"configuration.h"
 #include<fstream>
-#define HT 0.005
+#define HT 5E-8
 #define R2 8314
 class am_cell :public cell_base {
 	double n, r1, s1, s2, s3, m, h1, h2, dL, fL, dT, fT, Pa,
@@ -42,7 +42,7 @@ public:
 		Pi = 0.5898;
 		set_cell_type(2);
 		set_P_na(08.89E-7);
-		set_g_na(1);
+		set_g_na(700);
 		set_g_ca(1.8);
 		G_CaT = 6.0;
 		set_g_to(0.2);

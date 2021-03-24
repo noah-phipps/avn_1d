@@ -14,7 +14,7 @@ AVN Model Configuration File
 
 bool run_in_remote_configuration{ true };//True for running remotely on HPC etc, won't allow user input
 
-double sim_time = .2;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
+double sim_time = 2;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
 double start_record = 0; //Currently not implemented, time at which data recording can begin
 
 bool allow_main_simulation{ true }; //Allow the main simulation to run
@@ -22,6 +22,7 @@ bool allow_test_cells{ false }; //Allow the individual uncoupled test cells to r
 
 double stim_time = 0.001; //Duration of the stimulations
 double stim_current = (-1.2E-9);
+double first_stim_time = 0.05;
 
 std::string import_file_prefix{ "import_test_" };//Prefix for import files for initialising simulation
 std::string all_files_suffix{ "_original.txt" };//Suffix to denote version of files (Used when running many versions on remote HPC)
@@ -33,8 +34,8 @@ double switch_to_fine = 100;//Time to switch from coarse to fine at, set to long
 
 double time_per_step_estimate{ 1.96E-5 };//Estimate length of simulation given a previous time per timestep result 
 
-double am_cell_unit_multiplier{ 1E12 };
-double am_cell_stim_multiplier{ 4.2 };
+double am_cell_unit_multiplier{ 4.2E12 }; //1E12
+double am_cell_stim_multiplier{ 1 };//4.2, 3.5
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //INITIALISATION PARAMETERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -44,6 +45,11 @@ bool import_am{ true };
 bool import_n{ true };
 bool import_an{ true };
 bool import_nh{ true };
+
+//If performing analysis on a single test cell to get parameters; test_cells_ .txt will be (time \t voltage \t dvdt) (dvdt currently incorrect, but god enough for peak analysis)
+bool analyse_indivdial_cell{ false };
+//Set the individual cell to analyse; index is for the test cell array, so 0=am, 1=n, 2=an, 3=nh
+int individual_cell_index{ 0 };
 
 int N_slow = 200; //Number of cells in the slow pathway
 int N_fast = 325; //Number of cells in the fast pathway
