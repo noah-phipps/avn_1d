@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
 -------- -
 AVN Model main.cpp
-21 / 03 / 2021	Fully rewritten by Noah PHIPPS
+21 / 03 / 2021	Fully rewritten by Noah PHIPPS and Gemma LAMB
 --------------------------------------------------------------------
 ------ */
 
@@ -136,15 +136,15 @@ int main() {
 	test_cells[0] = test_am_cell;
 	test_cells_allowed[0] = allow_am;
 
-	av_node_2* test_n_cell = new av_node_2(1, 1);
+	av_node_2* test_n_cell = new av_node_2(1,1);
 	test_cells[1] = test_n_cell;
 	test_cells_allowed[1] = allow_n;
 
-	av_node_2* test_an_cell = new av_node_2(16, 2);
+	av_node_2* test_an_cell = new av_node_2(16,2);
 	test_cells[2] = test_an_cell;
 	test_cells_allowed[2] = allow_an;
 
-	av_node_2* test_nh_cell = new av_node_2(19, 3);
+	av_node_2* test_nh_cell = new av_node_2(19,3);
 	test_cells[3] = test_nh_cell;
 	test_cells_allowed[3] = allow_nh;
 
@@ -189,9 +189,11 @@ int main() {
 				am_cell* cell = new am_cell(0);
 				if (cell_number < 75) {
 					(*cell).set_coupling_conductance(1000E-9);
+					//(*cell).set_g_na(702E-9);//NEW
 				}
 				else {
 					(*cell).set_coupling_conductance((1000E-9 - (500E-9 / (1 +exp((cell_number - 120.5) / -5))))); //jacks:120.5
+					//(*cell).set_g_na(702E-9);//NEW
 				}
 				fast_cells[cell_number] = cell;
 			}
@@ -199,9 +201,11 @@ int main() {
 				am_cell* cell = new am_cell();
 				if (cell_number < 75) {
 					(*cell).set_coupling_conductance(1000E-9);
+					//(*cell).set_g_na(702E-9);//NEW
 				}
 				else {
 					(*cell).set_coupling_conductance((1000E-9 - (500E-9 / (1 +exp((cell_number - 120.5) / -5))))); //jacks:120.5
+					//(*cell).set_g_na(702E-9);//NEW
 				}
 				fast_cells[cell_number] = cell;
 			}
@@ -211,11 +215,13 @@ int main() {
 			if (import_an == true) {
 				av_node_2* cell = new av_node_2(16, 2);
 				(*cell).set_coupling_conductance(500E-9);
+				//(*cell).set_g_na(253E-9);//NEW
 				fast_cells[cell_number] = cell;
 			}
 			else {
 				av_node_2* cell = new av_node_2(16);
 				(*cell).set_coupling_conductance(500E-9);
+				//(*cell).set_g_na(253E-9);//NEW
 				fast_cells[cell_number] = cell;
 			}
 
@@ -224,13 +230,13 @@ int main() {
 			if (import_n == true) {
 				av_node_2* cell = new av_node_2(1, 1);
 				(*cell).set_coupling_conductance(300E-9);
-				(*cell).set_g_na(5E-13 / (1 +exp((cell_number + 25.0 - 238.0) / 2.5))); //jacks: 5
+				(*cell).set_g_na(3.2E-13 / (1 +exp((cell_number + 25.0 - 238.0) / 2.5))); //jacks: 5 //CHANGE FROM 5E-13 TO 2.53E-9
 				fast_cells[cell_number] = cell;
 			}
 			else {
 				av_node_2* cell = new av_node_2(1);
 				(*cell).set_coupling_conductance(300E-9);
-				(*cell).set_g_na(5E-13 / (1 +exp((cell_number + 25.0 - 238.0) / 2.5))); //jacks: 5
+				(*cell).set_g_na(3.2E-13 / (1 +exp((cell_number + 25.0 - 238.0) / 2.5))); //jacks: 5//CHANGE FROM 5E-13 TO 2.53E-9
 				fast_cells[cell_number] = cell;
 			}
 
@@ -240,10 +246,11 @@ int main() {
 				av_node_2* cell = new av_node_2(19, 3);
 				if (cell_number < 250) {
 					(*cell).set_coupling_conductance(300E-9);
-					(*cell).set_g_na(5E-13 / (1 +exp((cell_number + 25.0 - 263.0) / -2.5))); //jacks orig:5
+					(*cell).set_g_na(4E-13 / (1 +exp((cell_number + 25.0 - 263.0) / -2.5))); //jacks orig:5//CHANGE FROM 5E-13 TO 2.53E-9
 				}
 				else {
 					(*cell).set_coupling_conductance(500E-9); //jacks orig: 500
+					//(*cell).set_g_na(253E-9);//NEW
 				}
 				fast_cells[cell_number] = cell;
 			}
@@ -251,10 +258,11 @@ int main() {
 				av_node_2* cell = new av_node_2(19);
 				if (cell_number < 250) {
 					(*cell).set_coupling_conductance(300E-9);
-					(*cell).set_g_na(5E-13 / (1 +exp((cell_number + 25.0 - 263.0) / -2.5))); //jacks orig:5
+					(*cell).set_g_na(4E-13 / (1 + exp((cell_number + 25.0 - 263.0) / -2.5))); //jacks orig:5//CHANGE FROM 5E-13 TO 2.53E-9
 				}
 				else {
 					(*cell).set_coupling_conductance(500E-9); //jacks orig: 500
+					//(*cell).set_g_na(253E-9);//NEW
 				}
 				fast_cells[cell_number] = cell;
 			}
@@ -332,7 +340,7 @@ int main() {
 
 	//Initialise array counter
 	int array_counter = 0;
-	double deltaS = 0.1; //orig = 0.35
+	double deltaS = 0.4; //orig = 0.35
 
 	//START SIMULATION
 	std::cout << "Starting simulation...";
