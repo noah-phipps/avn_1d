@@ -132,7 +132,8 @@ int main() {
 	cell_base** test_cells = new cell_base * [4];
 	bool test_cells_allowed[4];
 	//Now generate cells just to test them; am, n, an, nh
-	am_cell* test_am_cell = new am_cell(0);
+	am_cell* test_am_cell = new am_cell();
+	test_am_cell->set_g_na(.702);//NEW
 	test_cells[0] = test_am_cell;
 	test_cells_allowed[0] = allow_am;
 
@@ -159,11 +160,13 @@ int main() {
 			if (import_am == true) {
 				am_cell* cell = new am_cell(0);
 				(*cell).set_coupling_conductance((1000E-9 - (500E-9 / (1 + exp((cell_number - 38) / -5))))); //jacks:500
+				(*cell).set_g_na(.702);//NEW
 				slow_cells[cell_number] = cell;
 			}
 			else {
 				am_cell* cell = new am_cell();
 				(*cell).set_coupling_conductance((1000E-9- (500E-9 / (1 + exp((cell_number - 38) / -5))))); //jacks:500
+				(*cell).set_g_na(.702);//NEW
 				slow_cells[cell_number] = cell;
 			}
 		}
@@ -189,11 +192,11 @@ int main() {
 				am_cell* cell = new am_cell(0);
 				if (cell_number < 75) {
 					(*cell).set_coupling_conductance(1000E-9);
-					//(*cell).set_g_na(702E-9);//NEW
+					(*cell).set_g_na(.702);//NEW
 				}
 				else {
 					(*cell).set_coupling_conductance((1000E-9 - (500E-9 / (1 +exp((cell_number - 120.5) / -5))))); //jacks:120.5
-					//(*cell).set_g_na(702E-9);//NEW
+					(*cell).set_g_na(.702);//NEW
 				}
 				fast_cells[cell_number] = cell;
 			}
@@ -201,11 +204,11 @@ int main() {
 				am_cell* cell = new am_cell();
 				if (cell_number < 75) {
 					(*cell).set_coupling_conductance(1000E-9);
-					//(*cell).set_g_na(702E-9);//NEW
+					(*cell).set_g_na(.702);//NEW
 				}
 				else {
 					(*cell).set_coupling_conductance((1000E-9 - (500E-9 / (1 +exp((cell_number - 120.5) / -5))))); //jacks:120.5
-					//(*cell).set_g_na(702E-9);//NEW
+					(*cell).set_g_na(.702);//NEW
 				}
 				fast_cells[cell_number] = cell;
 			}

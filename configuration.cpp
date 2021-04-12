@@ -17,12 +17,12 @@ bool run_in_remote_configuration{ true };//True for running remotely on HPC etc,
 double sim_time = 100;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
 double start_record = 0; //Currently not implemented, time at which data recording can begin
 
-bool allow_main_simulation{ true }; //Allow the main simulation to run
+bool allow_main_simulation{ false }; //Allow the main simulation to run
 bool allow_test_cells{ true }; //Allow the individual uncoupled test cells to run
 
 double stim_time = 0.001; //Duration of the stimulations
 double stim_current = (-1.2E-9);
-double first_stim_time = 0.01;
+double first_stim_time = 1;
 
 std::string import_file_prefix{ "import_test_" };//Prefix for import files for initialising simulation
 std::string all_files_suffix{ "_original.txt" };//Suffix to denote version of files (Used when running many versions on remote HPC)
@@ -34,7 +34,7 @@ double switch_to_fine = 100;//Time to switch from coarse to fine at, set to long
 
 double time_per_step_estimate{ 1.96E-5 };//Estimate length of simulation given a previous time per timestep result 
 
-double am_cell_unit_multiplier{ 3.5E12 }; //1E12
+double am_cell_unit_multiplier{ 1E12 }; //1E12
 double am_cell_stim_multiplier{ 1 };//4.2, 3.5
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //INITIALISATION PARAMETERS
@@ -63,9 +63,9 @@ double test_cell_stim_interval{ 0.4 };//Control interval between stimulations
 double test_stim_duration{ 0.001 };//Control stimulation duration
 
 bool allow_am{ true };
-bool allow_an{ true };
-bool allow_nh{ true };
-bool allow_n{ true };
+bool allow_an{ false };
+bool allow_nh{ false };
+bool allow_n{ false };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //BLOCKING PARAMETERS
