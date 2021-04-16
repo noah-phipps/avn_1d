@@ -14,7 +14,7 @@ AVN Model Configuration File
 
 bool run_in_remote_configuration{ true };//True for running remotely on HPC etc, won't allow user input
 
-double sim_time = 100;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
+double sim_time = 20;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
 double start_record = 0; //Currently not implemented, time at which data recording can begin
 
 bool allow_main_simulation{ false }; //Allow the main simulation to run
@@ -28,7 +28,7 @@ std::string import_file_prefix{ "import_test_" };//Prefix for import files for i
 std::string all_files_suffix{ "_original.txt" };//Suffix to denote version of files (Used when running many versions on remote HPC)
 
 //Timestep details
-double coarse_time_step = 5E-6;//Time step used initially
+double coarse_time_step = 5E-7;//Time step used initially
 double fine_time_step = 5E-8;//Time step switched to if required
 double switch_to_fine = 100;//Time to switch from coarse to fine at, set to longer than sim_time to avoid
 
@@ -41,7 +41,7 @@ double am_cell_stim_multiplier{ 1 };//4.2, 3.5
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Allow or block initialisation of pathways using import files from previous simulations
-bool import_am{ true };
+bool import_am{ false };
 bool import_n{ true };
 bool import_an{ true };
 bool import_nh{ true };
