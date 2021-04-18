@@ -14,14 +14,14 @@ AVN Model Configuration File
 
 bool run_in_remote_configuration{ true };//True for running remotely on HPC etc, won't allow user input
 
-double sim_time = 20;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
+double sim_time = 3;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
 double start_record = 0; //Currently not implemented, time at which data recording can begin
 
 bool allow_main_simulation{ false }; //Allow the main simulation to run
 bool allow_test_cells{ true }; //Allow the individual uncoupled test cells to run
 
 double stim_time = 0.001; //Duration of the stimulations
-double stim_current = (-1.2E-9);
+double stim_current = (-1.2E-9);//-1.2E-9
 double first_stim_time = 1;
 
 std::string import_file_prefix{ "import_test_" };//Prefix for import files for initialising simulation
@@ -42,12 +42,12 @@ double am_cell_stim_multiplier{ 1 };//4.2, 3.5
 
 //Allow or block initialisation of pathways using import files from previous simulations
 bool import_am{ false };
-bool import_n{ true };
-bool import_an{ true };
-bool import_nh{ true };
+bool import_n{ false };
+bool import_an{ false };
+bool import_nh{ false };
 
 //If performing analysis on a single test cell to get parameters; test_cells_ .txt will be (time \t voltage \t dvdt) (dvdt currently incorrect, but god enough for peak analysis)
-bool analyse_indivdial_cell{ false };
+bool analyse_indivdial_cell{ true };
 //Set the individual cell to analyse; index is for the test cell array, so 0=am, 1=n, 2=an, 3=nh
 int individual_cell_index{ 0 };
 
@@ -59,7 +59,7 @@ int N_fast = 325; //Number of cells in the fast pathway
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool stimulate_test_cells{ true };//Allow stimulation of the test cells
-double test_cell_stim_interval{ 0.4 };//Control interval between stimulations
+double test_cell_stim_interval{ 0.5 };//Control interval between stimulations
 double test_stim_duration{ 0.001 };//Control stimulation duration
 
 bool allow_am{ true };

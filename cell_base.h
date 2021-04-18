@@ -8,9 +8,9 @@ Cell Base Abstract Class
 #define CELL_BASE_H
 #define NEGLIGIBLE_SMALL pow(10,-5)
 #define F 96487 // Faraday's constant
-#define R 8.31 // Universal gas constant
+#define R 8.314 // Universal gas constant 8.314
 #define T 308 // Absolute temperature
-#define RTF 26.738
+#define RTF 26.539
 #include<string>
 
 class cell_base {

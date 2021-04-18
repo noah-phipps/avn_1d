@@ -40,7 +40,7 @@ public:
 		Pa = 3.533e-5;
 		Pi = .76898;
 		set_cell_type(2);
-		set_P_na(0.0014E-6);
+		set_P_na(1.4);//E-6
 		set_g_na(1);//Not accessed by AM cell
 		set_g_ca(4);
 		G_CaT = 6.0;
@@ -88,7 +88,7 @@ public:
 		Pa = 3.533e-5;
 		Pi = .76898;
 		set_cell_type(2);
-		set_P_na(0.0014E-6);
+		set_P_na(1.4);//E-6
 		set_g_na(1);//Not accessed by AM cell
 		set_g_ca(4);
 		G_CaT = 6.0;

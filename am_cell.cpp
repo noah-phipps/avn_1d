@@ -178,18 +178,19 @@ void am_cell::calc_INa(double time_step, int solve_method) {
 	//INa
 	alpha_m = -460 * (vm_mv + 44.4) / (exp(-(vm_mv + 44.4) / 12.673) - 1);
 	beta_m = 18400.0 * exp(-(vm_mv + 44.4) / 12.673);
-	m_inf = alpha_m / (alpha_m + beta_m);//Unsure about this
-	tau_m = 1000 / (alpha_m + beta_m);//Unsure about this
-	m += HT * (m_inf - m) / tau_m;//Unsure about this
+	//m_inf = alpha_m / (alpha_m + beta_m);//Unsure about this
+	//tau_m = 1000 / (alpha_m + beta_m);//Unsure about this
+	//m += HT * (m_inf - m) / tau_m;//Unsure about this
+	m += HT * ((alpha_m * (1 - m)) - (beta_m * m));
 
 	alpha_h = 44.9 * exp(-(vm_mv + 66.9) / 5.57);
 	beta_h = 1491.0 / (1 + 323.3 * exp(-(vm_mv + 94.6) / 12.9));
-	tau_h1 = 1000 * (0.03 / (1 + exp((vm_mv + 40) / 6.0)) + 0.00035);
-	tau_h2 = 1000 * (0.12 / (1 + exp((vm_mv + 60) / 2.0)) + 0.00295);
+	tau_h1 = 1 * (0.03 / (1 + exp((vm_mv + 40) / 6.0)) + 0.00035);//from 1000
+	tau_h2 = 1 * (0.12 / (1 + exp((vm_mv + 60) / 2.0)) + 0.00295);//from 1000
 	h_inf = alpha_h / (alpha_h + beta_h);
 	h1 += HT * (h_inf - h1) / tau_h1;
 	h2 += HT * (h_inf - h2) / tau_h2;
-	INa = get_P_na() * NaIono * F * F/(R*T) * pow(m, 3) * (0.635 * h1 + 0.365 * h2) * vm_mv * (exp((vm_mv - ENa)*(F/(R*T))) - 1) / (exp(vm_mv*F/(R*T)) - 1); // 0.75 - for instant activation !
+	INa = get_P_na() * NaIono * F * (F/(1000*R*T)) * pow(m, 3) * (0.635 * h1 + 0.365 * h2) * vm_mv * (exp((vm_mv - ENa)*(F/(1000*R*T))) - 1) / (exp(vm_mv*F/(1000*R*T)) - 1); // 0.75 - for instant activation !
 
 }
 
@@ -202,18 +203,18 @@ void am_cell::calc_IK(double time_step, int solve_method) {
 	alpha_pa = 9.0 * exp(vm_mv / 25.371);
 	beta_pa = 1.3 * exp(-vm_mv / 13.026);
 	pa_inf = 1. / (1 + exp(-(vm_mv + 5.1) / 7.4));
-	tau_pa = 1000. / (alpha_pa + beta_pa);
+	tau_pa = 1 / (alpha_pa + beta_pa);//from 1000
 	Pa += HT * (pa_inf - Pa) / tau_pa;
 	alpha_pi = 100. * exp(-vm_mv / 54.645);
 	beta_pi = 656. * exp(vm_mv / 106.157);
 	pi_inf = alpha_pi / (alpha_pi + beta_pi);
-	tau_pi = 1000.0 / (alpha_pi + beta_pi);
+	tau_pi = 1 / (alpha_pi + beta_pi);//from 1000
 	Pi += HT * (pi_inf - Pi) / tau_pi;
 	//Iks
 	alpha_n = 1.66 * exp(vm_mv / 69.452);
 	beta_n = 0.3 * exp(-vm_mv / 21.826);
 	n_inf = 1.0 / (1 + exp(-(vm_mv - 0.9) / 13.8));
-	tau_n = 1000 * (1. / (alpha_n + beta_n) + 0.06);
+	tau_n = 1 * (1. / (alpha_n + beta_n) + 0.06);//from 1000
 	n += HT * (n_inf - n) / tau_n;
 	double IKs, IKf;
 	IKs = G_Ks * n * (vm_mv - EK);
@@ -224,7 +225,8 @@ void am_cell::calc_IK(double time_step, int solve_method) {
 void am_cell::calc_Ik1(double time_step, int solve_method) {
 	double vm_mv = get_vm() * 1000;
 	double E0 = vm_mv - EK + 3.6;
-	Ik1 = get_g_k1() * pow(KIono / (KIono + 0.59), 3) * (vm_mv - EK) / (1 + exp((F/(R*T)) * 1.393 * E0));
+	Ik1 = get_g_k1() * pow(KIono / (KIono + 0.59), 3) * (vm_mv - EK) / (1 + exp(1.393 * E0 *(F/(1000*R*T))));
+	//Ik1 = get_g_k1() * pow(KIono / (KIono + 0.59), 3) * (vm_mv - EK) / (1 + exp(1.393 * E0 / RTF));
 }
 
 void am_cell::calc_Ito(double time_step, int solve_method) {
@@ -236,20 +238,20 @@ void am_cell::calc_Ito(double time_step, int solve_method) {
 	r_inf = 1 / (1 + exp((vm_mv +15.) / -5.633));
 	alpha_r = 386.6 * exp(vm_mv / 12.0);
 	beta_r = 8.011 * exp(-vm_mv / 7.2);
-	tau_r = 1000 * (1. / (alpha_r + beta_r) + 0.0004);
+	tau_r = 1 * (1. / (alpha_r + beta_r) + 0.0004);//from 1000
 
 	r1 += HT * (r_inf - r1) / tau_r;
 
 	s1_inf = 1. / (1 + exp((vm_mv + 28.29) / 7.06));
-	tau_s1 = 1000 * (0.189 / (1 + exp((vm_mv + 32.8) / 0.1)) + 0.0204);
+	tau_s1 = 1 * (0.189 / (1 + exp((vm_mv + 32.8) / 0.1)) + 0.0204);//from 1000
 	s1 += HT * (s1_inf - s1) / tau_s1;
 
 	s2_inf = 1. / (1 + exp((vm_mv + 28.29) / 7.06));
-	tau_s2 = 1000 * (5.75 / (1 + exp((vm_mv + 32.8) / 0.1)) + 0.02 + 0.45 / (1 + exp(-(vm_mv - 13.54) / 13.97)));
+	tau_s2 = 1 * (5.75 / (1 + exp((vm_mv + 32.8) / 0.1)) + 0.02 + 0.45 / (1 + exp(-(vm_mv - 13.54) / 13.97)));//from 1000
 	s2 += HT * (s2_inf - s2) / tau_s2;
 
 	s3_inf = ((1. / (1 + exp((vm_mv + 50.67) / 27.38))) + 0.666) / 1.666;
-	tau_s3 = 1000 * ((7.5 / (1 + exp((vm_mv + 23.0) / 0.5))) + 0.5);
+	tau_s3 = 1 * ((7.5 / (1 + exp((vm_mv + 23.0) / 0.5))) + 0.5);//from 1000
 	s3 += HT * (s3_inf - s3) / tau_s3;
 
 	Ito = get_g_to() * r1 * (0.590 * pow(s1, 3) + 0.410 * pow(s2, 3)) * (0.600 * pow(s3, 6) + 0.4) * (vm_mv - EK);    // CT - 0.2, PM - 0.35
@@ -258,11 +260,16 @@ void am_cell::calc_Ito(double time_step, int solve_method) {
 
 void am_cell::calc_INaCa(double time_step, int solve_method) {
 	double vm_mv = get_vm() * 1000;
-	INaCa = get_g_naca() * (((NaIoni * NaIoni * NaIoni) * 2.5 * exp(0.450 * vm_mv / RTF) - (140.0 * 140.0 * 140.0) * CaIoni * exp(vm_mv * (0.45 - 1) / RTF)) / (1 + 0.0003 * (CaIoni * (140.0 * 140.0 * 140.0) + 2.5 * (NaIoni * NaIoni * NaIoni))));
+	double phi_f = exp(0.45 * vm_mv * (3.0 - 2) * 1 * F / (1000 * R * T));
+	double phi_r = exp((0.45 - 1) * vm_mv * (3.0 - 2) * 1 * F / (1000 * R * T));
+	INaCa = get_g_naca();
+	INaCa *= ((pow(NaIoni, 3) * CaIono * phi_f) - (pow(NaIono, 3) * CaIoni * phi_r));
+	INaCa /= (1 + (0.0003 * ((pow(NaIono, 3) * CaIoni + (pow(NaIoni, 3) * CaIono)))));
+	//(((NaIoni * NaIoni * NaIoni) * 2.5 * exp(0.450 * vm_mv / RTF) - (140.0 * 140.0 * 140.0) * CaIoni * exp(vm_mv * (0.45 - 1) / RTF)) / (1 + 0.0003 * (CaIoni * (140.0 * 140.0 * 140.0) + 2.5 * (NaIoni * NaIoni * NaIoni))));
 }
 void am_cell::calc_Ip(double time_step, int solve_method) {
 	double vm_mv = get_vm() * 1000;
-	Ip = get_g_nak() * KIono / (KIono + 1) * (pow(NaIoni, 1.5) / (pow(NaIoni, 1.5) + pow(11, 1.5))) * ((vm_mv+150)/(vm_mv+200));
+	Ip = get_g_nak() * (KIono / (KIono + 1)) * (pow(NaIoni, 1.5) / (pow(NaIoni, 1.5) + pow(11, 1.5))) * ((vm_mv+150)/(vm_mv+200));
 }
 
 void am_cell::calc_Ib(double time_step, int solve_method) {
@@ -271,7 +278,7 @@ void am_cell::calc_Ib(double time_step, int solve_method) {
 }
 
 void am_cell::calc_ICap(double time_step, int solve_method) {
-	ICap = G_Cap_MAX * (CaIoni / (CaIoni + 0.002));
+	ICap = G_Cap_MAX * (CaIoni / (CaIoni + 0.0002));
 }
 
 void am_cell::calc_ICaL(double time_step, int solve_method) {
@@ -285,7 +292,7 @@ void am_cell::calc_ICaL(double time_step, int solve_method) {
 
 	beta_dl = 4.48 * (vm_mv - 5) / (exp((vm_mv - 5) / 2.5) - 1.);
 
-	tau_dl = 1000. / (alpha_dl + beta_dl);
+	tau_dl = 1 / (alpha_dl + beta_dl);//from 1000
 
 	dl_inf = 1. / (1 + exp(-(vm_mv + 0.95) / 6.6));
 
@@ -297,7 +304,7 @@ void am_cell::calc_ICaL(double time_step, int solve_method) {
 	beta_fl = 67.922 / (1 + exp(-(vm_mv + 28) / 4));
 	fl_inf = alpha_fl / (alpha_fl + beta_fl);
 	tau_fl = 0.211 * exp(-pow(((vm_mv+37.427)/20.213),2)) + 0.015;
-	tau_fl *= 1000;
+	tau_fl *= 1;//from 1000
 	fL += HT * (fl_inf - fL) / tau_fl;
 	vm_mv += 20;
 	ICaL = get_g_ca() * (dL * fL + 1.0 / (1 + exp(-(vm_mv - 33.0) / 12.0))) * (vm_mv - 60);
@@ -310,12 +317,12 @@ void am_cell::calc_ICaT(double time_step, int solve_method) {
 	//ICaT
 	alpha_dt = 674.173 * exp((vm_mv + 23.3) / 30.);
 	beta_dt = 674.173 * exp(-(vm_mv + 23.3) / 30.);
-	tau_dt = 1000. / (alpha_dt + beta_dt);
+	tau_dt = 1 / (alpha_dt + beta_dt);//from 1000
 	dt_inf = 1. / (1 + exp(-(vm_mv + 23.0) / 6.1));
 	dT += HT * (dt_inf - dT) / tau_dt;
 	alpha_ft = 9.637 * exp(-(vm_mv + 75) / 83.3);
 	beta_ft = 9.637 * exp((vm_mv + 75) / 15.38);
-	tau_ft = 1000.0 / (alpha_ft + beta_ft);
+	tau_ft = 1 / (alpha_ft + beta_ft);//from 1000
 	ft_inf = alpha_ft / (alpha_ft + beta_ft);
 	fT += HT * (ft_inf - fT) / tau_ft;
 	ICaT = G_CaT * dT * fT * (vm_mv - 38);

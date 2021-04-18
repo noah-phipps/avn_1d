@@ -133,7 +133,6 @@ int main() {
 	bool test_cells_allowed[4];
 	//Now generate cells just to test them; am, n, an, nh
 	am_cell* test_am_cell = new am_cell();
-	test_am_cell->set_g_na(.702);//NEW
 	test_cells[0] = test_am_cell;
 	test_cells_allowed[0] = allow_am;
 
