@@ -206,8 +206,8 @@ public:
 
 		double cm = (*this).get_cm();
 		double diff_vm = -I / cm;
-		vm = solve_diff_eqn(vm, diff_vm, time_step, solve_method);
-		(*this).set_vm(vm);
+		//vm = solve_diff_eqn(vm, diff_vm, time_step, solve_method);
+		(*this).set_vm(vm+diff_vm*time_step);
 	}
 	void set_coupling_conductance(double g) {
 		coupling_conductance = g;
@@ -227,6 +227,7 @@ public:
 	}
 	virtual void export_cell(int) = 0;
 	virtual void print_currents(std::ofstream&,double,int) = 0;
+	virtual void print_ions(std::ofstream&, double) = 0;
 };
 
 #endif

@@ -147,12 +147,16 @@ void am_cell::print_currents(std::ofstream& output_file, double time, int cell_t
 	output_file << cell_type << "\t" << time << "\t" << INa << "\t" << IK << "\t" << Ik1 << "\t" << Ito << "\t" << INaCa << "\t" << Ip << "\t" << Ib << "\t" << ICap << "\t" << ICaL << "\t" << ICaT << "\t" << Isus << std::endl;
 }
 
+void am_cell::print_ions(std::ofstream& output_file, double time) {
+	output_file << time << "\t" << NaIoni << "\t" << KIoni << "\t" << CaIoni << "\t" << CaIonup << "\t" << CaIonrel << "\t"<<I_up << "\t" << I_rel <<"\t"<<I_tr << "\t" <<O_c << "\t" <<O_TnCa << "\t"<< O_TnMgCa << "\t" <<O_calse<< "\t" << O_TnMgMg << std::endl;
+}
+
 double am_cell::get_total_ion(bool i_bna_zero) {
 	//double I = ((INa + IK + Ik1 + Ito + INaCa + Ip + Ib + ICap + ICaL + ICaT + Isus));
 	//if (i_bna_zero) {
 	//	I -= i_b_na;
 	//}
-	return (INa + IK + Ik1 + Ito + INaCa + Ip + Ib + ICap + ICaL + ICaT);//Removed Isus
+	return (INa + IK + Ik1 + Ito + INaCa + Ip + Ib + ICap + ICaL + ICaT+Isus);//Removed Isus
 }
 
 void am_cell::calc_i_all(double time_step, int solve_method, int l) {
@@ -168,6 +172,7 @@ void am_cell::calc_i_all(double time_step, int solve_method, int l) {
 	calc_ICaT(time_step, solve_method);
 	calc_Isus(time_step, solve_method);
 	calc_i_b_na(time_step, solve_method);
+	calc_intracellular_dynamics();
 }
 
 void am_cell::calc_INa(double time_step, int solve_method) {
@@ -225,7 +230,7 @@ void am_cell::calc_IK(double time_step, int solve_method) {
 void am_cell::calc_Ik1(double time_step, int solve_method) {
 	double vm_mv = get_vm() * 1000;
 	double E0 = vm_mv - EK + 3.6;
-	Ik1 = get_g_k1() * pow(KIono / (KIono + 0.59), 3) * (vm_mv - EK) / (1 + exp(1.393 * E0 *(F/(1000*R*T))));
+	Ik1 = get_g_k1() * pow(KIono / (KIono + 0.59), 3) * (vm_mv - EK) / (1 + exp(1.393 * E0 *(F/(1000*R*T))));//.59
 	//Ik1 = get_g_k1() * pow(KIono / (KIono + 0.59), 3) * (vm_mv - EK) / (1 + exp(1.393 * E0 / RTF));
 }
 
@@ -243,11 +248,11 @@ void am_cell::calc_Ito(double time_step, int solve_method) {
 	r1 += HT * (r_inf - r1) / tau_r;
 
 	s1_inf = 1. / (1 + exp((vm_mv + 28.29) / 7.06));
-	tau_s1 = 1 * (0.189 / (1 + exp((vm_mv + 32.8) / 0.1)) + 0.0204);//from 1000
+	tau_s1 = 1 * (0.54 / (1 + exp((vm_mv + 32.8) / 0.1)) + 0.0204);//from 1000
 	s1 += HT * (s1_inf - s1) / tau_s1;
 
 	s2_inf = 1. / (1 + exp((vm_mv + 28.29) / 7.06));
-	tau_s2 = 1 * (5.75 / (1 + exp((vm_mv + 32.8) / 0.1)) + 0.02 + 0.45 / (1 + exp(-(vm_mv - 13.54) / 13.97)));//from 1000
+	tau_s2 = 1 * (5.75 / (1 + exp((vm_mv + 32.8) / 0.1)) + 0.02 + 0.45 * (-1 * pow(exp(-(vm_mv - 13.54) / 13.97),2)));//from 1000
 	s2 += HT * (s2_inf - s2) / tau_s2;
 
 	s3_inf = ((1. / (1 + exp((vm_mv + 50.67) / 27.38))) + 0.666) / 1.666;
@@ -262,7 +267,7 @@ void am_cell::calc_INaCa(double time_step, int solve_method) {
 	double vm_mv = get_vm() * 1000;
 	double phi_f = exp(0.45 * vm_mv * (3.0 - 2) * 1 * F / (1000 * R * T));
 	double phi_r = exp((0.45 - 1) * vm_mv * (3.0 - 2) * 1 * F / (1000 * R * T));
-	INaCa = get_g_naca();
+	INaCa = get_g_naca();//Added e-3
 	INaCa *= ((pow(NaIoni, 3) * CaIono * phi_f) - (pow(NaIono, 3) * CaIoni * phi_r));
 	INaCa /= (1 + (0.0003 * ((pow(NaIono, 3) * CaIoni + (pow(NaIoni, 3) * CaIono)))));
 	//(((NaIoni * NaIoni * NaIoni) * 2.5 * exp(0.450 * vm_mv / RTF) - (140.0 * 140.0 * 140.0) * CaIoni * exp(vm_mv * (0.45 - 1) / RTF)) / (1 + 0.0003 * (CaIoni * (140.0 * 140.0 * 140.0) + 2.5 * (NaIoni * NaIoni * NaIoni))));
@@ -278,7 +283,7 @@ void am_cell::calc_Ib(double time_step, int solve_method) {
 }
 
 void am_cell::calc_ICap(double time_step, int solve_method) {
-	ICap = G_Cap_MAX * (CaIoni / (CaIoni + 0.0002));
+	ICap = G_Cap_MAX* (CaIoni / (CaIoni + 0.0002));//1000 to fix units
 }
 
 void am_cell::calc_ICaL(double time_step, int solve_method) {
@@ -306,7 +311,7 @@ void am_cell::calc_ICaL(double time_step, int solve_method) {
 	tau_fl = 0.211 * exp(-pow(((vm_mv+37.427)/20.213),2)) + 0.015;
 	tau_fl *= 1;//from 1000
 	fL += HT * (fl_inf - fL) / tau_fl;
-	vm_mv += 20;
+
 	ICaL = get_g_ca() * (dL * fL + 1.0 / (1 + exp(-(vm_mv - 33.0) / 12.0))) * (vm_mv - 60);
 }
 
@@ -335,4 +340,63 @@ void am_cell::calc_Isus(double time_step, int solve_method) {
 void am_cell::calc_i_b_na(double time_step, int solve_method) {
 	double vm_mv = get_vm() * 1000;
 	i_b_na = get_P_na() * vm_mv * ((pow(F, 2.0)) / (R * 1000 * T)) * ((NaIoni - ((NaIono)*exp(-(F * vm_mv) / (R * 1000 * T)))) / (1 - (exp(-(vm_mv * F) / (R * 1000 * T)))));
+}
+
+void am_cell::calc_intracellular_dynamics() {
+	double vm_mv = get_vm() * 1000;
+
+	double IB_Na{ get_g_b_na() * (vm_mv - ENa) };
+	double IB_Cl{ Gb_Cl * (vm_mv - ECl) };
+	double IB_Ca{ get_g_b_ca() * (vm_mv - ECa) };
+	O_c_dot = 200000 * CaIoni * (1 - O_c) - 476 * O_c;
+
+	O_TnCa_dot = 78400 * CaIoni * (1 - O_TnCa) - 392 * O_TnCa;
+
+	O_TnMgCa_dot = 200000 * CaIoni * (1 - O_TnMgCa - O_TnMgMg) - 6.6 * O_TnMgCa;
+
+	O_TnMgMg_dot = 2000 * 2.5 * (1 - O_TnMgCa - O_TnMgMg) - 666 * O_TnMgMg;
+
+	O_calse_dot = 480 * CaIonrel * (1 - O_calse) - 400 * O_calse;
+
+	double phi_ca = 0.08 * O_TnCa_dot + 0.16 * O_TnMgCa_dot + 0.045 * O_c_dot;
+	NaIoni += HT * -(INa + IB_Na + Ip + Ip + Ip + INaCa + INaCa + INaCa) / (F * 0.0126);
+
+	KIoni += HT * -(Ito + Ik1 + IK - Ip - Ip) / (0.0126 * F);
+
+	CaIoni += HT * (-((ICaL+ICaT)+IB_Ca + ICap - INaCa - INaCa + I_up - I_rel) / (2*F*5.884E-3)-phi_ca);//=-phi_ca
+
+
+
+	O_c += HT * O_c_dot;
+	O_TnCa += HT * O_TnCa_dot;
+	O_TnMgCa += HT * O_TnMgCa_dot;
+	O_TnMgMg += HT * O_TnMgMg_dot;
+	O_calse += HT * O_calse_dot;
+
+	I_up = I_up_max * (CaIoni/0.0003 - .4*.4*CaIonup/0.5) / ( (CaIoni+0.0003)/0.0003 + (CaIonup + .5)*.4/.5 );//1000 to fix units
+
+	I_tr = (CaIonup - CaIonrel) * 2 * F * 0.0441E-3 / 0.01;
+
+	I_rel = 200000 * pow((F_2 / (F_2 + 0.25)), 2) * (CaIonrel - CaIoni);
+
+	CaIonup += HT  * ((I_up - I_tr) / (2 * 0.3969E-3 * F));
+
+	CaIonrel += HT   * (((I_tr - I_rel) / (2 * 0.0441E-3 * F)) - (31 * O_calse_dot));
+
+	
+	
+
+	double k_act, k_inact;
+	k_act = 203.8 * pow((CaIoni / (CaIoni + 0.3E3)), 4) + 203.8 * exp((vm_mv - 40) / 12.5);//0.3E3
+	k_inact = 33.96 + 339.6 * pow((CaIoni / (CaIoni + 0.3E3)), 4);//0.3E3
+
+	F_1 += HT * ((0.815 * F_3) - (k_act * F_1));
+	F_2 += HT * ((k_act * F_1) - (k_inact * F_2));
+	F_3 += HT * ((k_inact * F_2) - (0.815 * F_3));
+
+	EK = RTF * log(KIono / KIoni);
+	ENa = RTF * log(NaIono / NaIoni);
+	ECa = (RTF / 2.) * log(CaIono / CaIoni);
+	ECl = RTF * log(30. / 132.);
+	EbCl = ECl - 0.49 * (ECl - 30.59);
 }

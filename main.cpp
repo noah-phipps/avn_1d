@@ -21,6 +21,10 @@ int main() {
 	file_name.append(all_files_suffix);
 	std::ofstream fast_cell_data{ file_name };
 
+	file_name = "am_ions";
+	file_name.append(all_files_suffix);
+	std::ofstream am_ions{ file_name };
+
 	file_name = "am_test_stim_current";
 	file_name.append(all_files_suffix);
 	std::ofstream am_test_stim_current{ file_name };
@@ -361,9 +365,27 @@ int main() {
 		if (allow_test_cells == true) {
 			for (int i{}; i < 4; i++) {
 				if (test_cells_allowed[i] == true) {
-					if (stimulate_test_cells == false) {
+					if (stimulate_test_cells == false && clamp_test_cells == false) {
 						(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
 						(*test_cells[i]).calc_vm(time_step, solve_method, false);
+					}
+					else if (clamp_test_cells == true) {
+						if (time > clamp_duration + clamp_peak_start_time) {
+							(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+							(*test_cells[i]).calc_vm(time_step, solve_method, false);
+						}
+						else if (time > clamp_peak_start_time) {
+							(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+							(*test_cells[i]).set_vm(clamp_peak_voltage);
+						}
+						else if (time > clamp_hold_start_time) {
+							(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+							(*test_cells[i]).set_vm(clamp_holding_voltage);
+						}
+						else {
+							(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+							(*test_cells[i]).calc_vm(time_step, solve_method, false);
+						}
 					}
 					else {
 						if (time >= first_stim_time + test_cell_stim_counter[i] * test_cell_stim_interval) {
@@ -399,6 +421,7 @@ int main() {
 				(*test_cells[1]).print_currents(n_test_currents, time, 1);
 				(*test_cells[2]).print_currents(an_test_currents, time, 16);
 				(*test_cells[3]).print_currents(nh_test_currents, time, 19);
+				(*test_cells[0]).print_ions(am_ions, time);
 				am_test_stim_current << time << "\t" << (*test_cells[0]).get_i_stim() << std::endl;
 				test_cell_data << std::endl;
 			}

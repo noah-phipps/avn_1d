@@ -14,15 +14,15 @@ AVN Model Configuration File
 
 bool run_in_remote_configuration{ true };//True for running remotely on HPC etc, won't allow user input
 
-double sim_time = 3;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
+double sim_time = 2;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
 double start_record = 0; //Currently not implemented, time at which data recording can begin
 
 bool allow_main_simulation{ false }; //Allow the main simulation to run
 bool allow_test_cells{ true }; //Allow the individual uncoupled test cells to run
 
 double stim_time = 0.001; //Duration of the stimulations
-double stim_current = (-1.2E-9);//-1.2E-9
-double first_stim_time = 1;
+double stim_current = (-2.5E-9);//-1.2E-9
+double first_stim_time = .5;
 
 std::string import_file_prefix{ "import_test_" };//Prefix for import files for initialising simulation
 std::string all_files_suffix{ "_original.txt" };//Suffix to denote version of files (Used when running many versions on remote HPC)
@@ -58,8 +58,14 @@ int N_fast = 325; //Number of cells in the fast pathway
 //TEST CELL PARAMETERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool stimulate_test_cells{ true };//Allow stimulation of the test cells
+bool stimulate_test_cells{ false };//Allow stimulation of the test cells
 double test_cell_stim_interval{ 0.5 };//Control interval between stimulations
+bool clamp_test_cells{ true };
+double clamp_holding_voltage{ -90E-3 };
+double clamp_peak_voltage{ 30E-3 };
+double clamp_hold_start_time{ 1 };
+double clamp_peak_start_time{ 1.5 };
+double clamp_duration{ 50E-3 };
 double test_stim_duration{ 0.001 };//Control stimulation duration
 
 bool allow_am{ true };
