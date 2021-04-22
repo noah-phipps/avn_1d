@@ -58,9 +58,9 @@ int N_fast = 325; //Number of cells in the fast pathway
 //TEST CELL PARAMETERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool stimulate_test_cells{ false };//Allow stimulation of the test cells
+bool stimulate_test_cells{ true };//Allow stimulation of the test cells
 double test_cell_stim_interval{ 0.5 };//Control interval between stimulations
-bool clamp_test_cells{ true };
+bool clamp_test_cells{ false };
 double clamp_holding_voltage{ -90E-3 };
 double clamp_peak_voltage{ 30E-3 };
 double clamp_hold_start_time{ 1 };

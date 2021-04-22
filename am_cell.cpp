@@ -156,7 +156,7 @@ double am_cell::get_total_ion(bool i_bna_zero) {
 	//if (i_bna_zero) {
 	//	I -= i_b_na;
 	//}
-	return (INa + IK + Ik1 + Ito + INaCa + Ip + Ib + ICap + ICaL + ICaT+Isus);//Removed Isus
+	return (INa + IK + Ik1 + Ito + INaCa + Ip + Ib + ICap + ICaL + ICaT + Isus);//Removed Isus
 }
 
 void am_cell::calc_i_all(double time_step, int solve_method, int l) {
@@ -331,6 +331,7 @@ void am_cell::calc_ICaT(double time_step, int solve_method) {
 	ft_inf = alpha_ft / (alpha_ft + beta_ft);
 	fT += HT * (ft_inf - fT) / tau_ft;
 	ICaT = G_CaT * dT * fT * (vm_mv - 38);
+	//ICaT = 0;//Added for testing
 }
 
 void am_cell::calc_Isus(double time_step, int solve_method) {
