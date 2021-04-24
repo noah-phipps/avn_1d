@@ -69,6 +69,33 @@ extern double clamp_peak_voltage;
 extern double clamp_hold_start_time;
 extern double clamp_peak_start_time;
 extern double clamp_duration;
-
 extern double stim_interval;
+extern int print_adjuster;
+extern bool clamp_multiple_voltages;
+extern double first_clamp_voltage;
+extern double last_clamp_voltage;
+extern double clamp_voltage_step;
+extern int multiple_clamp_type;
+extern double triangle_peak_voltage;
+extern double triangle_peak_time;
+extern double triangle_return_to_hold_time;
+extern bool done_indexes;
+extern int number_stims;
+
+extern double first_AM_activation_time;
+extern double AM_activation_time; // Last AM cell (75th fastcell) before start of fast / slow pathways
+extern double middle_fast_activation_time; // Middle (150th fast cell)fast pathway cell
+extern double middle_slow_activation_time; // Middle (100th slow cell)slow pathway cell
+extern double first_bundle_activation_time; // Start of penetratingbundle(first N cell after fast / slow pathway 226th fast cell)
+extern double middle_bundle_activation_time; // Middle (288th fast cell)His Bundle cell
+extern double activationPoint; // Reference pointfor activation potential activation(mV)
+extern double start_monitoring_activation;
+extern bool first_AM_activated;
+extern bool AM_activated;
+extern bool middle_fast_activated;
+extern bool middle_slow_activated;
+extern bool first_bundle_activated;
+extern bool middle_bundle_activated;
+extern bool all_activated;
+
 #endif

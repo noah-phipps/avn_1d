@@ -147,9 +147,7 @@ public:
 		delete[] cell_parameters;
 	}
 	void print_currents(std::ofstream&,double,int);
-	void print_ions(std::ofstream&, double) {
-		std::cerr << "Cannot call this for AVN cells";
-	}
+
 	void export_cell(int);
 	void calc_na(double, int);
 	void initalise_avn(int);
@@ -164,9 +162,16 @@ public:
 	void calc_ach(double time_step, int solve_method, int l);
 	void calc_ca_in(double, int);
 	void calc_b_na();
+	double get_i_cal() {
+		std::cout << "Error ical does not exist for avn cell" << std::endl;
+		return 999;
+	}
 	//void calc_vm(double time_step, int solve_method, double setVM, bool blocking_ibna, bool blocking_ical, double ical_block_multiplier);
 	//Ach concentration set/ get (added 20/02/18)
 	void set_vm_clamp(double voltage);
+	void reset() {
+		std::cout << "Error, no implementation for AVN cells..." << std::endl;
+	}
 	void set_ach_conc(double insert_ach) {
 		ach_conc = insert_ach;
 	}
@@ -219,6 +224,9 @@ public:
 	double get_i_to() { return i_to; }
 	double get_i_f() { return i_f; }
 	double get_i_ach() { return i_ach; }
+	double get_i_k1() { return 999; }
+	double get_i_naca() { return 999; }
+	
 };
 
 #endif
