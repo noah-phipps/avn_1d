@@ -227,7 +227,13 @@ public:
 	}
 	virtual void export_cell(int) = 0;
 	virtual void print_currents(std::ofstream&,double,int) = 0;
-	virtual void print_ions(std::ofstream&, double) = 0;
+	virtual double get_i_na() = 0;
+	virtual double get_i_cal() = 0;
+	virtual void reset() = 0;
+	virtual double get_i_k1() = 0;
+	virtual double get_i_to() = 0;
+	virtual double get_i_kr() = 0;
+	virtual double get_i_naca() = 0;
 };
 
 #endif
