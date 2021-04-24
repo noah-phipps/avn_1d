@@ -161,7 +161,7 @@ double am_cell::get_total_ion(bool i_bna_zero) {
 	//if (i_bna_zero) {
 	//	I -= i_b_na;
 	//}
-	return (INa + IK + Ik1 + Ito + INaCa + Ip + Ib + ICap + ICaL + ICaT+Isus);//Removed Isus
+	return (INa + IK + Ik1 + Ito + INaCa + Ip + Ib + ICap + ICaL + ICaT + Isus);//Removed Isus
 }
 
 void am_cell::calc_i_all(double time_step, int solve_method, int l) {

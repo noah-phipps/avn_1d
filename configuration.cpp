@@ -15,17 +15,14 @@ AVN Model Configuration File
 bool run_in_remote_configuration{ true };//True for running remotely on HPC etc, won't allow user input
 
 double sim_time = 2;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
-
 double start_record = 0; //Currently not implemented, time at which data recording can begin
 
-bool allow_main_simulation{ true }; //Allow the main simulation to run
-bool allow_test_cells{ false }; //Allow the individual uncoupled test cells to run
+bool allow_main_simulation{ false }; //Allow the main simulation to run
+bool allow_test_cells{ true }; //Allow the individual uncoupled test cells to run
 
 double stim_time = 0.001; //Duration of the stimulations
-
-double stim_current = (-2E-9);//-1.2E-9
+double stim_current = (-2.5E-9);//-1.2E-9
 double first_stim_time = .5;
-double stim_interval = 0.5;
 
 std::string import_file_prefix{ "import_test_" };//Prefix for import files for initialising simulation
 std::string all_files_suffix{ "_original.txt" };//Suffix to denote version of files (Used when running many versions on remote HPC)
@@ -49,7 +46,6 @@ bool import_n{ false };
 bool import_an{ false };
 bool import_nh{ false };
 
-
 //If performing analysis on a single test cell to get parameters; test_cells_ .txt will be (time \t voltage \t dvdt) (dvdt currently incorrect, but god enough for peak analysis)
 bool analyse_indivdial_cell{ true };
 //Set the individual cell to analyse; index is for the test cell array, so 0=am, 1=n, 2=an, 3=nh
@@ -62,10 +58,9 @@ int N_fast = 325; //Number of cells in the fast pathway
 //TEST CELL PARAMETERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool stimulate_test_cells{ false };//Allow stimulation of the test cells
+bool stimulate_test_cells{ true };//Allow stimulation of the test cells
 double test_cell_stim_interval{ 0.5 };//Control interval between stimulations
-bool clamp_test_cells{ true };
-
+bool clamp_test_cells{ false };
 double clamp_holding_voltage{ -90E-3 };
 double clamp_peak_voltage{ 30E-3 };
 double clamp_hold_start_time{ 1 };
@@ -74,9 +69,9 @@ double clamp_duration{ 50E-3 };
 double test_stim_duration{ 0.001 };//Control stimulation duration
 
 bool allow_am{ true };
-bool allow_an{ true };
-bool allow_nh{ true };
-bool allow_n{ true };
+bool allow_an{ false };
+bool allow_nh{ false };
+bool allow_n{ false };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //BLOCKING PARAMETERS
@@ -104,5 +99,6 @@ double total_time_steps{};
 int answer = 2;
 int answer2 = 3;
 int answer3 = 0;
+
 
 int solve_method = 1;
