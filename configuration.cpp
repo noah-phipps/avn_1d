@@ -14,13 +14,15 @@ AVN Model Configuration File
 
 bool run_in_remote_configuration{ true };//True for running remotely on HPC etc, won't allow user input
 
-double sim_time = 10;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
+double sim_time = 2;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
+
 double start_record = 0; //Currently not implemented, time at which data recording can begin
 
 bool allow_main_simulation{ true }; //Allow the main simulation to run
 bool allow_test_cells{ false }; //Allow the individual uncoupled test cells to run
 
 double stim_time = 0.001; //Duration of the stimulations
+
 double stim_current = (-2E-9);//-1.2E-9
 double first_stim_time = .5;
 double stim_interval = 0.5;
@@ -29,7 +31,7 @@ std::string import_file_prefix{ "import_test_" };//Prefix for import files for i
 std::string all_files_suffix{ "_original.txt" };//Suffix to denote version of files (Used when running many versions on remote HPC)
 
 //Timestep details
-double coarse_time_step = 5E-6;//Time step used initially
+double coarse_time_step = 5E-7;//Time step used initially
 double fine_time_step = 5E-8;//Time step switched to if required
 double switch_to_fine = 100;//Time to switch from coarse to fine at, set to longer than sim_time to avoid
 
@@ -43,12 +45,13 @@ double am_cell_stim_multiplier{ 1 };//4.2, 3.5
 
 //Allow or block initialisation of pathways using import files from previous simulations
 bool import_am{ false };
-bool import_n{ true };
-bool import_an{ true };
-bool import_nh{ true };
+bool import_n{ false };
+bool import_an{ false };
+bool import_nh{ false };
+
 
 //If performing analysis on a single test cell to get parameters; test_cells_ .txt will be (time \t voltage \t dvdt) (dvdt currently incorrect, but god enough for peak analysis)
-bool analyse_indivdial_cell{ false };
+bool analyse_indivdial_cell{ true };
 //Set the individual cell to analyse; index is for the test cell array, so 0=am, 1=n, 2=an, 3=nh
 int individual_cell_index{ 0 };
 
@@ -59,9 +62,10 @@ int N_fast = 325; //Number of cells in the fast pathway
 //TEST CELL PARAMETERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool stimulate_test_cells{ true };//Allow stimulation of the test cells
+bool stimulate_test_cells{ false };//Allow stimulation of the test cells
 double test_cell_stim_interval{ 0.5 };//Control interval between stimulations
-bool clamp_test_cells{ false };
+bool clamp_test_cells{ true };
+
 double clamp_holding_voltage{ -90E-3 };
 double clamp_peak_voltage{ 30E-3 };
 double clamp_hold_start_time{ 1 };

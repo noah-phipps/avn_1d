@@ -421,7 +421,8 @@ int main() {
 				(*test_cells[1]).print_currents(n_test_currents, time, 1);
 				(*test_cells[2]).print_currents(an_test_currents, time, 16);
 				(*test_cells[3]).print_currents(nh_test_currents, time, 19);
-				//(*test_cells[0]).print_ions(am_ions, time);
+				(*test_cells[0]).print_ions(am_ions, time);
+
 				am_test_stim_current << time << "\t" << (*test_cells[0]).get_i_stim() << std::endl;
 				test_cell_data << std::endl;
 			}

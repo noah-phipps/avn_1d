@@ -69,5 +69,6 @@ extern double clamp_peak_voltage;
 extern double clamp_hold_start_time;
 extern double clamp_peak_start_time;
 extern double clamp_duration;
+
 extern double stim_interval;
 #endif
