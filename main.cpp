@@ -346,7 +346,7 @@ int main() {
 
 	//Initialise array counter
 	int array_counter = 0;
-	double deltaS = 0.4; //orig = 0.35
+
 
 	//START SIMULATION
 	std::cout << "Starting simulation...";
@@ -422,6 +422,7 @@ int main() {
 				(*test_cells[2]).print_currents(an_test_currents, time, 16);
 				(*test_cells[3]).print_currents(nh_test_currents, time, 19);
 				(*test_cells[0]).print_ions(am_ions, time);
+
 				am_test_stim_current << time << "\t" << (*test_cells[0]).get_i_stim() << std::endl;
 				test_cell_data << std::endl;
 			}
@@ -433,11 +434,12 @@ int main() {
 			if (i_bna_invest) {
 				i_bna_zero = true;
 			}
-			stim_current = 0;
+			double this_stim{ 0 };
 			//control stim time
-			for (int noStim = 0; noStim < 200; noStim++) {
-				if (time > (first_stim_time + noStim * deltaS) && time < (first_stim_time + noStim * deltaS) + stim_time) {
-					stim_current = -1.2e-9;
+			for (int noStim = 0; noStim < 20; noStim++) {
+				if (time > (first_stim_time + noStim * stim_interval) && time < (first_stim_time + noStim * stim_interval) + stim_time) {
+					std::cout << "Stimulating at " << time << " s..." << std::endl;
+					this_stim = stim_current;
 				}
 			}
 			//Loop over fast pathway
@@ -445,13 +447,14 @@ int main() {
 				(*fast_cells[i]).set_i_stim(0.0);
 				(*fast_cells[i]).calc_i_all(time_step, solve_method, l);
 				bool stim = false;
+
 				if (i == 0) {
 					double cell_current = (*fast_cells[i]).get_coupling_conductance() * ((*fast_cells[i]).get_vm() - (*fast_cells[i + 1]).get_vm());
 					if ((*fast_cells[i]).get_cell_type() == 2) {
-						(*fast_cells[i]).set_i_stim(stim_current * am_cell_stim_multiplier * am_cell_unit_multiplier);
+						(*fast_cells[i]).set_i_stim(this_stim * am_cell_stim_multiplier * am_cell_unit_multiplier);
 					}
 					else {
-						(*fast_cells[i]).set_i_stim(stim_current);
+						(*fast_cells[i]).set_i_stim(this_stim);
 					}
 				}
 				else if (i == 74) {

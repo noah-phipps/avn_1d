@@ -34,6 +34,7 @@ am_cell::am_cell(int version) {
 	input_file.close();
 	n = import_parameters[0];
 	r1 = import_parameters[1];
+	//r1 = import_parameters[1];
 	s1 = import_parameters[2];
 	s2 = import_parameters[3];
 	s3 = import_parameters[4];
@@ -52,6 +53,7 @@ am_cell::am_cell(int version) {
 	ECa = import_parameters[17];
 	ECl = import_parameters[18];
 	EbCl = import_parameters[19];
+
 	INa = import_parameters[20];
 	IK = import_parameters[21];
 	Ik1 = import_parameters[22];
@@ -64,6 +66,7 @@ am_cell::am_cell(int version) {
 	ICaT = import_parameters[29];
 	Isus = import_parameters[30];
 	i_b_na = import_parameters[31];
+
 	//Now the cell base parameters
 	set_vm(import_parameters[32]);
 	set_vm_1(import_parameters[33]);
@@ -107,6 +110,7 @@ void am_cell::export_cell(int version) {
 	export_parameters[17] = ECa;
 	export_parameters[18] = ECl;
 	export_parameters[19] = EbCl;
+
 	export_parameters[20] = INa;
 	export_parameters[21] = IK;
 	export_parameters[22] = Ik1;
@@ -119,6 +123,7 @@ void am_cell::export_cell(int version) {
 	export_parameters[29] = ICaT;
 	export_parameters[30] = Isus;
 	export_parameters[31] = i_b_na;
+
 	//Now the cell base parameters
 	export_parameters[32] = get_vm();
 	export_parameters[33] = get_vm_1();
@@ -162,6 +167,7 @@ double am_cell::get_total_ion(bool i_bna_zero) {
 void am_cell::calc_i_all(double time_step, int solve_method, int l) {
 	calc_INa(time_step, solve_method);
 	calc_IK(time_step, solve_method);
+
 	calc_Ik1(time_step, solve_method);
 	calc_Ito(time_step, solve_method);
 	calc_INaCa(time_step, solve_method);
@@ -197,6 +203,7 @@ void am_cell::calc_INa(double time_step, int solve_method) {
 	h2 += HT * (h_inf - h2) / tau_h2;
 	INa = get_P_na() * NaIono * F * (F/(1000*R*T)) * pow(m, 3) * (0.635 * h1 + 0.365 * h2) * vm_mv * (exp((vm_mv - ENa)*(F/(1000*R*T))) - 1) / (exp(vm_mv*F/(1000*R*T)) - 1); // 0.75 - for instant activation !
 
+
 }
 
 void am_cell::calc_IK(double time_step, int solve_method) {
@@ -224,6 +231,7 @@ void am_cell::calc_IK(double time_step, int solve_method) {
 	double IKs, IKf;
 	IKs = G_Ks * n * (vm_mv - EK);
 	IKf = 3.5 * Pa * Pi * (vm_mv - EK); //ikr = 0 sometimes!
+
 	IK = IKf + IKs;
 }
 
@@ -261,6 +269,7 @@ void am_cell::calc_Ito(double time_step, int solve_method) {
 
 	Ito = get_g_to() * r1 * (0.590 * pow(s1, 3) + 0.410 * pow(s2, 3)) * (0.600 * pow(s3, 6) + 0.4) * (vm_mv - EK);    // CT - 0.2, PM - 0.35
 
+
 }
 
 void am_cell::calc_INaCa(double time_step, int solve_method) {
@@ -275,6 +284,7 @@ void am_cell::calc_INaCa(double time_step, int solve_method) {
 void am_cell::calc_Ip(double time_step, int solve_method) {
 	double vm_mv = get_vm() * 1000;
 	Ip = get_g_nak() * (KIono / (KIono + 1)) * (pow(NaIoni, 1.5) / (pow(NaIoni, 1.5) + pow(11, 1.5))) * ((vm_mv+150)/(vm_mv+200));
+
 }
 
 void am_cell::calc_Ib(double time_step, int solve_method) {
@@ -331,7 +341,7 @@ void am_cell::calc_ICaT(double time_step, int solve_method) {
 	ft_inf = alpha_ft / (alpha_ft + beta_ft);
 	fT += HT * (ft_inf - fT) / tau_ft;
 	ICaT = G_CaT * dT * fT * (vm_mv - 38);
-	//ICaT = 0;//Added for testing
+
 }
 
 void am_cell::calc_Isus(double time_step, int solve_method) {
@@ -400,4 +410,5 @@ void am_cell::calc_intracellular_dynamics() {
 	ECa = (RTF / 2.) * log(CaIono / CaIoni);
 	ECl = RTF * log(30. / 132.);
 	EbCl = ECl - 0.49 * (ECl - 30.59);
+
 }
