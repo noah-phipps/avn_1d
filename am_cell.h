@@ -79,6 +79,7 @@ public:
 		ECa = (RTF / 2.) * log(CaIono / CaIoni);
 		ECl = RTF * log(30. / 132.);
 		EbCl = ECl - 0.49 * (ECl - 30.59);
+
 	}
 	void export_cell(int);
 	void calc_i_all(double, int, int);
@@ -127,6 +128,7 @@ public:
 		ECa = (RTF / 2.) * log(CaIono / CaIoni);
 		ECl = RTF * log(30. / 132.);
 		EbCl = ECl - 0.49 * (ECl - 30.59);
+
 	}
 	void print_ions(std::ofstream&, double);
 	void print_currents(std::ofstream&, double, int);
@@ -142,5 +144,6 @@ public:
 	void calc_ICaT(double, int);
 	void calc_Isus(double, int);
 	void calc_i_b_na(double, int);
+
 	void calc_intracellular_dynamics();
 };
