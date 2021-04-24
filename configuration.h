@@ -63,4 +63,11 @@ extern double am_cell_stim_multiplier;
 extern bool analyse_indivdial_cell;
 extern int individual_cell_index;
 extern double first_stim_time;
+extern bool clamp_test_cells;
+extern double clamp_holding_voltage;
+extern double clamp_peak_voltage;
+extern double clamp_hold_start_time;
+extern double clamp_peak_start_time;
+extern double clamp_duration;
+extern double stim_interval;
 #endif

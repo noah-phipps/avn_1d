@@ -14,15 +14,16 @@ AVN Model Configuration File
 
 bool run_in_remote_configuration{ true };//True for running remotely on HPC etc, won't allow user input
 
-double sim_time = 100;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
+double sim_time = 10;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
 double start_record = 0; //Currently not implemented, time at which data recording can begin
 
-bool allow_main_simulation{ false }; //Allow the main simulation to run
-bool allow_test_cells{ true }; //Allow the individual uncoupled test cells to run
+bool allow_main_simulation{ true }; //Allow the main simulation to run
+bool allow_test_cells{ false }; //Allow the individual uncoupled test cells to run
 
 double stim_time = 0.001; //Duration of the stimulations
-double stim_current = (-1.2E-9);
-double first_stim_time = 1;
+double stim_current = (-2E-9);//-1.2E-9
+double first_stim_time = .5;
+double stim_interval = 0.5;
 
 std::string import_file_prefix{ "import_test_" };//Prefix for import files for initialising simulation
 std::string all_files_suffix{ "_original.txt" };//Suffix to denote version of files (Used when running many versions on remote HPC)
@@ -41,7 +42,7 @@ double am_cell_stim_multiplier{ 1 };//4.2, 3.5
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Allow or block initialisation of pathways using import files from previous simulations
-bool import_am{ true };
+bool import_am{ false };
 bool import_n{ true };
 bool import_an{ true };
 bool import_nh{ true };
@@ -59,13 +60,19 @@ int N_fast = 325; //Number of cells in the fast pathway
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool stimulate_test_cells{ true };//Allow stimulation of the test cells
-double test_cell_stim_interval{ 0.4 };//Control interval between stimulations
+double test_cell_stim_interval{ 0.5 };//Control interval between stimulations
+bool clamp_test_cells{ false };
+double clamp_holding_voltage{ -90E-3 };
+double clamp_peak_voltage{ 30E-3 };
+double clamp_hold_start_time{ 1 };
+double clamp_peak_start_time{ 1.5 };
+double clamp_duration{ 50E-3 };
 double test_stim_duration{ 0.001 };//Control stimulation duration
 
 bool allow_am{ true };
-bool allow_an{ false };
-bool allow_nh{ false };
-bool allow_n{ false };
+bool allow_an{ true };
+bool allow_nh{ true };
+bool allow_n{ true };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //BLOCKING PARAMETERS

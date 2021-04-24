@@ -147,6 +147,9 @@ public:
 		delete[] cell_parameters;
 	}
 	void print_currents(std::ofstream&,double,int);
+	void print_ions(std::ofstream&, double) {
+		std::cerr << "Cannot call this for AVN cells";
+	}
 	void export_cell(int);
 	void calc_na(double, int);
 	void initalise_avn(int);
