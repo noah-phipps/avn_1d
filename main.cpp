@@ -170,15 +170,15 @@ int main() {
 	test_cells[0] = test_am_cell;
 	test_cells_allowed[0] = allow_am;
 
-	av_node_2* test_n_cell = new av_node_2(1,1);
+	av_node_2* test_n_cell = new av_node_2(1);
 	test_cells[1] = test_n_cell;
 	test_cells_allowed[1] = allow_n;
 
-	av_node_2* test_an_cell = new av_node_2(16,2);
+	av_node_2* test_an_cell = new av_node_2(16);
 	test_cells[2] = test_an_cell;
 	test_cells_allowed[2] = allow_an;
 
-	av_node_2* test_nh_cell = new av_node_2(19,3);
+	av_node_2* test_nh_cell = new av_node_2(19);
 	test_cells[3] = test_nh_cell;
 	test_cells_allowed[3] = allow_nh;
 
@@ -797,6 +797,36 @@ int main() {
 				}
 				if (first_AM_activated == true && AM_activated == true && middle_fast_activated == true && middle_slow_activated == true && first_bundle_activated == true && middle_bundle_activated == true) {
 					std::cout << "All cells activated at " << time << "s...\a" << std::endl;
+					all_activated = true;
+					activation_times << first_AM_activation_time << "\t" << AM_activation_time << "\t" << middle_fast_activation_time << "\t" << middle_slow_activation_time << "\t" << first_bundle_activation_time << "\t" << middle_bundle_activation_time;
+					activation_times.close();
+				}
+				if (time >= sim_time - coarse_time_step && all_activated == false) {
+					std::cout << "Not all cells activated... " << time << "s...\a" << std::endl;
+					if (first_AM_activated == false) {
+						std::cout << "First AM not activated, setting to 999..." << std::endl;
+						first_AM_activation_time = 999;
+					}
+					if (AM_activated == false) {
+						std::cout << "Last AM not activated, setting to 999..." << std::endl;
+						AM_activation_time = 999;
+					}
+					if (middle_fast_activated == false) {
+						std::cout << "Middle fast not activated, setting to 999..." << std::endl;
+						middle_fast_activation_time = 999;
+					}
+					if (middle_slow_activated == false) {
+						std::cout << "Middle slow not activated, setting to 999..." << std::endl;
+						middle_slow_activation_time = 999;
+					}
+					if (first_bundle_activated == false) {
+						std::cout << "First bundle not activated, setting to 999..." << std::endl;
+						first_bundle_activation_time = 999;
+					}
+					if (middle_bundle_activated == false) {
+						std::cout << "Middle bundle not activated, setting to 999..." << std::endl;
+						middle_bundle_activation_time = 999;
+					}
 					all_activated = true;
 					activation_times << first_AM_activation_time << "\t" << AM_activation_time << "\t" << middle_fast_activation_time << "\t" << middle_slow_activation_time << "\t" << first_bundle_activation_time << "\t" << middle_bundle_activation_time;
 					activation_times.close();

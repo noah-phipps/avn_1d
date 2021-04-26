@@ -28,9 +28,10 @@ class am_cell :public cell_base {
 	const double Nai = 8;
 	const double Cao = 2;
 	const double Cai = 0.0001;//0.0001
-	const double Ko = 5.4;
-	const double Ki = 140;
-
+	const double Ko = 5.4;//5.4
+	const double Ki = 90;//140
+	const double Clo = 130;//132
+	const double Cli = 15.0;//30
 	const double KmK = 0.621;
 	const double KmNa = 5.64;
 	const double yNaCa = 0.5;
@@ -41,13 +42,14 @@ class am_cell :public cell_base {
 	const double ECa = 0.5 * RTOnF * log(Cao / Cai);
 	const double EK = RTOnF * log(Ko / Ki);
 	const double EKs = RTOnF * log((Ko + 0.003 * Nao) / (Ki + 0.03 * Nai));
+	const double ECl = RTOnF * log(Cli/Clo);
 
 	const double aj = 73.1;   //Ach rate constant
 	const double ak = 3.7;    //Ach rate constant
 	//double Ach =2.0e-7;
 	double Ach = 0.0;
 
-	double INa{}, IK{}, IKf{}, IKs{}, Ik1{}, Ito{}, INaCa{}, Ip{}, Ib{}, ICaL{}, ICaT{}, Isus{}, IbNa{}, IbCa{}, IAch{};//Change
+	double INa{}, IK{}, IKf{}, IKs{}, Ik1{}, Ito{}, INaCa{}, Ip{}, Ib{}, ICaL{}, ICaT{}, Isus{}, IbNa{}, IbCa{}, IAch{}, IbCl{};//Change
 
 	double m, h1, h2, dL, fL, dT, fT, r, paf, pi, n, s1, s2, s3, sj, sk;
 
@@ -76,13 +78,13 @@ public:
 		Ach = 0.0;
 		set_i_stim(0);//0 when initialising
 		set_coupling_conductance(0);//Only needed in 1D; set in main
-		set_g_na(1.0);//Truly a factor for P_na
+		set_g_na(1.);//Truly a factor for P_na
 		set_g_ca(6);//For ICaL
 		set_g_kr(0);//Unused
 		set_g_st(0);//Unused
 		set_g_b(0);//Unused
-		set_g_b_na(0.02);
-		set_g_b_ca(0.02);
+		set_g_b_na(0.02);//.02
+		set_g_b_ca(0.02);//.02
 		set_p_max(0);//Unused
 		set_k_naca(0.02);//Used for g_NaCa
 		set_P_na(0.0014);

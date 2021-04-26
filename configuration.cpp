@@ -19,19 +19,19 @@ double start_record = 0; //Currently not implemented, time at which data recordi
 
 int number_stims = 20;//Use 20 as default, number of stimulations in the simulation
 
-bool allow_main_simulation{ true }; //Allow the main simulation to run
+bool allow_main_simulation{ false }; //Allow the main simulation to run
 bool allow_test_cells{ true }; //Allow the individual uncoupled test cells to run
 
 double stim_time = 0.001; //Duration of the stimulations
 double stim_current = (-1.2E-9);//-1.2E-9
-double first_stim_time = .1;
+double first_stim_time = 99.1;
 double stim_interval = 0.5;
 
 std::string import_file_prefix{ "import_test_" };//Prefix for import files for initialising simulation
 std::string all_files_suffix{ "_original.txt" };//Suffix to denote version of files (Used when running many versions on remote HPC)
 
 //Timestep details
-double coarse_time_step = 5E-6;//Time step used initially
+double coarse_time_step = 5E-8;//Time step used initially
 double fine_time_step = 5E-8;//Time step switched to if required
 double switch_to_fine = 100;//Time to switch from coarse to fine at, set to longer than sim_time to avoid
 
@@ -43,19 +43,19 @@ double am_cell_stim_multiplier{ 1.666666 };//Changes to 2nA, as required by prot
 int print_adjuster{ 2000 };//Adjusts how many timesteps it is between each printing to file
 
 double activationPoint{ -30E-3 }; // Reference point for activation potential activation
-double start_monitoring_activation = 1.5;//Time at which to start monitoring for activation
+double start_monitoring_activation = 1;//Time at which to start monitoring for activation
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //INITIALISATION PARAMETERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Allow or block initialisation of pathways using import files from previous simulations
 bool import_am{ false };
-bool import_n{ true };
+bool import_n{ false };
 bool import_an{ false };
 bool import_nh{ false };
 
 //If performing analysis on a single test cell to get parameters; test_cells_ .txt will be (time \t voltage \t dvdt) (dvdt currently incorrect, but god enough for peak analysis)
-bool analyse_indivdial_cell{ false };
+bool analyse_indivdial_cell{ true };
 //Set the individual cell to analyse; index is for the test cell array, so 0=am, 1=n, 2=an, 3=nh
 int individual_cell_index{ 0 };
 
@@ -66,9 +66,9 @@ int N_fast = 325; //Number of cells in the fast pathway
 //TEST CELL PARAMETERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Multiple clamps
-bool clamp_multiple_voltages{ false };
-double first_clamp_voltage{ -70E-3 };
-double last_clamp_voltage{ 50E-3 };
+bool clamp_multiple_voltages{ true };
+double first_clamp_voltage{ -40E-3 };
+double last_clamp_voltage{ 40E-3 };
 double clamp_voltage_step{ 1E-3 };
 int multiple_clamp_type{ 0 };//0 for standard pulse, 1 for triangular
 double triangle_peak_voltage{ 35E-3 };
@@ -76,25 +76,25 @@ double triangle_peak_time{ 1.03194 };
 double triangle_return_to_hold_time{ 1.20106 };
 
 //Both types of clamps
-double clamp_duration{ 50E-3 };
+double clamp_duration{ 300E-3 };
 double clamp_hold_start_time{ 0.5 };
 double clamp_peak_start_time{ 1 };
-double clamp_holding_voltage{ -75E-3 };
+double clamp_holding_voltage{ -50E-3 };
 
 //Single clamp
 bool clamp_test_cells{ false };
 double clamp_peak_voltage{ -80E-3 };
 
 //Stimulations
-bool stimulate_test_cells{ false };//Allow stimulation of the test cells
+bool stimulate_test_cells{ true };//Allow stimulation of the test cells
 double test_cell_stim_interval{ 0.5 };//Control interval between stimulations
 double test_stim_duration{ 0.001 };//Control stimulation duration
 
 //Allowing cells to run
 bool allow_am{ true };
-bool allow_an{ true };
-bool allow_nh{ true };
-bool allow_n{ true };
+bool allow_an{ false };
+bool allow_nh{ false };
+bool allow_n{ false };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //BLOCKING PARAMETERS

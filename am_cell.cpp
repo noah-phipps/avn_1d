@@ -149,13 +149,13 @@ void am_cell::export_cell(int version) {
 }
 
 void am_cell::print_currents(std::ofstream& output_file, double time, int cell_type) {
-	output_file << cell_type << "\t" << time << "\t" << INa << "\t" << IK<<"\t"<< IKf << "\t" << IKs << "\t" << Ik1 << "\t" << Ito << "\t" << INaCa << "\t" << Ip << "\t" << Ib << "\t" << IbNa << "\t" << IbCa <<"\t" << ICaL << "\t" << ICaT << "\t" << Isus << "\t" << IAch <<std::endl;
+	output_file << cell_type << "\t" << time << "\t" << INa << "\t" << IK << "\t" << IKf << "\t" << IKs << "\t" << Ik1 << "\t" << Ito << "\t" << INaCa << "\t" << Ip << "\t" << Ib << "\t" << IbNa << "\t" << IbCa << "\t" << ICaL << "\t" << ICaT << "\t" << Isus << "\t" << IAch << "\t" << IbCl << std::endl;
 }
 
 
 
 double am_cell::get_total_ion(bool i_bna_zero) {
-	return (IKf + IKs + Ik1 + Ito + Ip + INaCa + INa + IbNa + IbCa + ICaL + ICaT + IAch);
+	return (IKf + IKs + Ik1 + Ito + Ip + INaCa + INa + Ib + ICaL + ICaT + IAch);
 }
 
 void am_cell::calc_i_all(double time_step, int solve_method, int l) {
@@ -236,7 +236,7 @@ void am_cell::calc_IK(double time_step, int solve_method) {
 
 void am_cell::calc_Ik1(double time_step, int solve_method) {
 	double vm_mv = get_vm() * 1000;
-	Ik1 = 10.16 * pow(Ko / (Ko + 0.59), 3) * (vm_mv - EK) / (1 + exp(1.393 * (vm_mv - EK + 3.6) / RTOnF));
+	Ik1 = 5. * pow(Ko / (Ko + 0.59), 3) * (vm_mv - EK) / (1 + exp(1.393 * (vm_mv - EK + 3.6) / RTOnF));//g_k1 10.16 originally
 
 }
 
@@ -265,7 +265,7 @@ void am_cell::calc_Ito(double time_step, int solve_method) {
 	s3m = ((1. / (1 + exp((vm_mv + 50.67) / 27.38))) + 0.666) / 1.666;
 	ts3 = (7.5 / (1 + exp((vm_mv + 23.0) / 0.5))) + 0.5;
 	s3 = s3 + HT * (s3m - s3) / ts3;
-	Ito = 10.004 * r * (0.590 * pow(s1, 3) + 0.410 * pow(s2, 3)) * (0.600 * pow(s3, 6) + 0.4) * (vm_mv - EK);
+	Ito = 40. * r * (0.590 * pow(s1, 3) + 0.410 * pow(s2, 3)) * (0.600 * pow(s3, 6) + 0.4) * (vm_mv - EK);//10.004 as g_to originally
 	//Isus = 1.3 * (vm_mv + 70);
 	//Ito += Isus;
 }
@@ -288,7 +288,10 @@ void am_cell::calc_Ib(double time_step, int solve_method) {
 
 	IbCa =  get_g_b_ca()* (vm_mv - ECa);
 
-	Ib = IbNa + IbCa;
+	IbCl = 0.3 * (vm_mv - ECl);//0.12
+	//IbCl*= (1 + exp((vm_mv - (ECl + 36.95)) / 74.514));
+
+	Ib = IbNa + IbCa+IbCl;
 }
 
 
@@ -333,7 +336,7 @@ void am_cell::calc_ICaL(double time_step, int solve_method) {
 	vm_mv = vm_mv + 10;
 	B = 0.56 * (Ach / (1.2e-7 + Ach));  //b Ach effect
 
-	ICaL = (1 - B) * 7.2 * (dL * fL + 1.0 / (1 + exp(-(vm_mv- 33.0) / 12.0))) * (vm_mv- 60);
+	ICaL = (1 - B) * 3.5 * (dL * fL + 1.0 / (1 + exp(-(vm_mv- 33.0) / 12.0))) * (vm_mv- 60);//g_cal originally 7.2
 }
 
 void am_cell::calc_ICaT(double time_step, int solve_method) {
