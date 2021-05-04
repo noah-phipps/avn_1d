@@ -14,28 +14,28 @@ AVN Model Configuration File
 
 bool run_in_remote_configuration{ true };//True for running remotely on HPC etc, won't allow user input
 
-double sim_time = 2;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
+double sim_time = 30;//Time for whole simulation //50 for N, 6 for NH //11.5 for AN
 double start_record = 0; //Currently not implemented, time at which data recording can begin
 
-int number_stims = 20;//Use 20 as default, number of stimulations in the simulation
+int number_stims = 0;//Use 20 as default, number of stimulations in the simulation
 
-bool allow_main_simulation{ false }; //Allow the main simulation to run
-bool allow_test_cells{ true }; //Allow the individual uncoupled test cells to run
+bool allow_main_simulation{ true }; //Allow the main simulation to run
+bool allow_test_cells{ false }; //Allow the individual uncoupled test cells to run
 
 double stim_time = 0.001; //Duration of the stimulations
 double stim_current = (-1.2E-9);//-1.2E-9
-double first_stim_time = 99.1;
+double first_stim_time = 90.1;
 double stim_interval = 0.5;
 
 std::string import_file_prefix{ "import_test_" };//Prefix for import files for initialising simulation
 std::string all_files_suffix{ "_original.txt" };//Suffix to denote version of files (Used when running many versions on remote HPC)
 
 //Timestep details
-double coarse_time_step = 5E-8;//Time step used initially
+double coarse_time_step = 5E-6;//Time step used initially
 double fine_time_step = 5E-8;//Time step switched to if required
 double switch_to_fine = 100;//Time to switch from coarse to fine at, set to longer than sim_time to avoid
 
-double time_per_step_estimate{ 1.96E-5 };//Estimate length of simulation given a previous time per timestep result 
+double time_per_step_estimate{ .00248293 };//Estimate length of simulation given a previous time per timestep result 
 
 double am_cell_unit_multiplier{ 1E12 }; //1E12
 double am_cell_stim_multiplier{ 1.666666 };//Changes to 2nA, as required by protocol
@@ -43,19 +43,19 @@ double am_cell_stim_multiplier{ 1.666666 };//Changes to 2nA, as required by prot
 int print_adjuster{ 2000 };//Adjusts how many timesteps it is between each printing to file
 
 double activationPoint{ -30E-3 }; // Reference point for activation potential activation
-double start_monitoring_activation = 1;//Time at which to start monitoring for activation
+double start_monitoring_activation = 3;//Time at which to start monitoring for activation
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //INITIALISATION PARAMETERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Allow or block initialisation of pathways using import files from previous simulations
-bool import_am{ false };
-bool import_n{ false };
-bool import_an{ false };
-bool import_nh{ false };
+bool import_am{ true };
+bool import_n{ true };
+bool import_an{ true };
+bool import_nh{ true };
 
 //If performing analysis on a single test cell to get parameters; test_cells_ .txt will be (time \t voltage \t dvdt) (dvdt currently incorrect, but god enough for peak analysis)
-bool analyse_indivdial_cell{ true };
+bool analyse_indivdial_cell{ false };
 //Set the individual cell to analyse; index is for the test cell array, so 0=am, 1=n, 2=an, 3=nh
 int individual_cell_index{ 0 };
 
@@ -66,7 +66,7 @@ int N_fast = 325; //Number of cells in the fast pathway
 //TEST CELL PARAMETERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Multiple clamps
-bool clamp_multiple_voltages{ true };
+bool clamp_multiple_voltages{ false };
 double first_clamp_voltage{ -40E-3 };
 double last_clamp_voltage{ 40E-3 };
 double clamp_voltage_step{ 1E-3 };
@@ -92,20 +92,24 @@ double test_stim_duration{ 0.001 };//Control stimulation duration
 
 //Allowing cells to run
 bool allow_am{ true };
-bool allow_an{ false };
-bool allow_nh{ false };
-bool allow_n{ false };
+bool allow_an{ true };
+bool allow_nh{ true };
+bool allow_n{ true };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //BLOCKING PARAMETERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool SKF = false;
+bool SKF = true;
+int answer = 0;//1 for SKF
+
 bool blockNa = false;
 bool blockCa = false;
 bool i_bna_invest = false; //Enable blocking of ibna if true
 double factor_block;//Factor by which Ca and Na are blocked; needs to be configured to allow independent factors, usually set via command line
-int l = 0;//Controls ACh concentration; usually set via command line
+const int l = 0;//Controls ACh concentration; usually set via command line
+int answer3 = 0;
+//0 for 0, 1 for 10-6, 2 for 10-7, 3 for .5*10-7, 4 for .3*10-7, 5 for 10-8
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //VARIABLES THAT NEED TO BE DECLARED BUT NOT CONFIGURED
@@ -121,9 +125,9 @@ bool done_indexes{ false };
 double total_time_taken{};
 double total_time_steps{};
 
-int answer = 2;
+
 int answer2 = 3;
-int answer3 = 0;
+
 
 int solve_method = 1;
 

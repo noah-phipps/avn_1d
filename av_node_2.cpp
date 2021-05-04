@@ -20,14 +20,17 @@ void av_node_2::initalise_avn(int cell_type) {
 	set_k_naca(SET_PARAMS(get_cm(), 2500.0e-12, 12187.5e-12));
 	if (cell_type == 16) { //AN cell
 		filename = "AnCell";
+		std::cout << "AN Cell...\n";
 		filename.append(all_files_suffix);
 	}
 	else if (cell_type == 19) {
 		filename = "NhCell";
+		std::cout << "Nh Cell...\n";
 		filename.append(all_files_suffix);
 	}
 	else {
-		filename = "NCell_CONTROL";
+		filename = "NCell_SKF";
+		std::cout << "SKF N Cell...\n";
 		filename.append(all_files_suffix);
 	}
 	std::ifstream input_file{ filename };
@@ -119,7 +122,22 @@ av_node_2::av_node_2(int cell_type, int version) {
 	initalise_avn(cell_type);
 	std::string filename{ import_file_prefix };
 	filename.append(std::to_string(version));
-	filename.append(all_files_suffix);
+	if (cell_type!=1) {
+		filename.append(all_files_suffix);
+	}
+	else if(answer3==1){
+		filename.append("_ach.txt");
+		std::cout << "Importing ACh...\n";
+		std::cout << filename;
+	}
+	else if (answer == 1) {
+		filename.append("_skf.txt");
+		std::cout << "Importing SKF...\n";
+		std::cout << filename;
+	}
+	else {
+		filename.append(all_files_suffix);
+	}
 	double* import_parameters = new double[71];
 	std::ifstream input_file(filename);
 	for (int i = 0; i < 71; i++)
@@ -192,7 +210,7 @@ av_node_2::av_node_2(int cell_type, int version) {
 	g_bna= import_parameters[54];
 	g_bca= import_parameters[55];
 	g_bk= import_parameters[56];
-	l= static_cast<int>(import_parameters[57]);
+	//l= static_cast<int>(import_parameters[57]);
 	//Now the cell base parameters
 	set_vm(import_parameters[58]);
 	set_vm_1(import_parameters[59]);
@@ -531,6 +549,9 @@ void av_node_2::calc_naca() {
 //Acetylcholine sensitive current (added 11/04/2008) //Changed to AVN IC model version
 void av_node_2::calc_ach(double time_step, int solve_method, int l)
 {
+	if (get_cell_type() != 1) {
+		l = 0;
+	}
 	double alpha, beta, diff_value, g_ach;
 	double k_ach = 3.5e-7;
 	double fastInactShift{ 0 }, fastSlopeShift{ 0 }, slowInactShift{ 0 }, slowSlopeShift{ 0 }, scaling_I{ 0 }, shift_I{ 0 };

@@ -169,7 +169,7 @@ void am_cell::calc_i_all(double time_step, int solve_method, int l) {
 	calc_ICaL(time_step, solve_method);
 	calc_ICaT(time_step, solve_method);
 	calc_Isus(time_step, solve_method);
-	calc_i_ach(time_step, solve_method);
+	calc_i_ach(time_step, solve_method,l);
 
 }
 
@@ -367,11 +367,29 @@ void am_cell::calc_Isus(double time_step, int solve_method) {
 	Isus = 0;
 }
 
-void am_cell::calc_i_ach(double time_step, int solve_method) {
+void am_cell::calc_i_ach(double time_step, int solve_method, int l) {
 	double Bj, Bk;
 	double gAch;
 	double vm_mv = get_vm() * 1000;
-
+	l = 0;
+	if (l == 0) {
+		Ach = 0;
+	}
+	else if (l == 1) {
+		Ach = pow(10, -6);
+	}
+	else if (l == 2) {
+		Ach = pow(10, -7);
+	}
+	else if (l == 3) {
+		Ach = 0.5 * pow(10, -7);
+	}
+	else if (l == 4) {
+		Ach = 0.3 * pow(10, -7);
+	}
+	else if (l == 5) {
+		Ach = pow(10, -8);
+	}
 	Bj = 120. / (1 + exp(-(vm_mv + 50) / 15.));
 	Bk = 5.82 / (1 + exp(-(vm_mv + 50) / 15.0));
 	sj = sj + HT * (aj * (1 - sj) - Bj * sj);

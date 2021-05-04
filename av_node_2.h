@@ -40,7 +40,7 @@ class av_node_2 : public cell_base {
 	double f_tc{}, f_tmc{}, f_tmm{}, f_cmi{}, f_cms{}, f_cq{};
 	double f_csl{};
 	double g_bna{}, g_bca{}, g_bk{};
-	int l{}; //added for ach
+	//int l{}; //added for ach
 public:
 	av_node_2(int, int);
 	av_node_2(int cell_type) {
@@ -59,7 +59,7 @@ public:
 			filename.append(all_files_suffix);
 		}
 		else {
-			filename = "NCell_CONTROL";
+			filename = "NCell_SKF";
 			filename.append(all_files_suffix);
 		}
 		std::ifstream input_file{ filename };
@@ -179,7 +179,8 @@ public:
 		return ach_conc;
 	}
 	void set_ACh_level(int input_l) {
-		l = input_l;
+		//l = input_l;
+		std::cout << "No implementation...";
 	}
 	int get_ACh_level() {
 		return l;

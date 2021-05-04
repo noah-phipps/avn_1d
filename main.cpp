@@ -107,33 +107,33 @@ int main() {
 		std::cin.clear();
 	}
 
-	if (answer3 == 0) {
-		l = 0;
-	}
-	else if (answer3 == 1) {
-		l = 1;
-	}
-	else if (answer3 == 2) {
-		l = 2;
-	}
-	else if (answer3 == 3) {
-		l = 3;
-	}
-	else if (answer3 == 4) {
-		l = 4;
-	}
-	else if (answer3 == 5) {
-		l = 5;
-	}
-	else {
-		std::cerr << "Incorrect input...\n\n\n";
-		exit(1);
-	}
+	//if (answer3 == 0) {
+	//	l = 0;
+	//}
+	//else if (answer3 == 1) {
+	//	l = 1;
+	//}
+	//else if (answer3 == 2) {
+	//	l = 2;
+	//}
+	//else if (answer3 == 3) {
+	//	l = 3;
+	//}
+	//else if (answer3 == 4) {
+	//	l = 4;
+	//}
+	//else if (answer3 == 5) {
+	//	l = 5;
+	//}
+	//else {
+	//	std::cerr << "Incorrect input...\n\n\n";
+	//	exit(1);
+	//}
 
 	//If adding SKF
 	if (answer == 1) {
 		SKF = true;
-		solve_method = 2;
+		solve_method = 1;//Was 2
 	}
 
 	//If blocking
@@ -192,14 +192,14 @@ int main() {
 		if (cell_number < 75) {
 			if (import_am == true) {
 				am_cell* cell = new am_cell(0);
-				(*cell).set_coupling_conductance((1000E-9 - (500E-9 / (1 + exp((cell_number - 38) / -5))))); //jacks:500
-				//(*cell).set_g_na(.702);//NEW, removed atm
+				(*cell).set_coupling_conductance((1000E-9 - (700E-9 / (1 + exp((cell_number - 38) / -5))))); //jacks:500
+				(*cell).set_g_na(.57);//NEW, removed atm
 				slow_cells[cell_number] = cell;
 			}
 			else {
 				am_cell* cell = new am_cell();
-				(*cell).set_coupling_conductance((1000E-9- (500E-9 / (1 + exp((cell_number - 38) / -5))))); //jacks:500
-				//(*cell).set_g_na(.702);//NEW, removed atm
+				(*cell).set_coupling_conductance((1000E-9- (700E-9 / (1 + exp((cell_number - 38) / -5))))); //jacks:500
+				(*cell).set_g_na(.57);//NEW, removed atm
 				slow_cells[cell_number] = cell;
 			}
 		}
@@ -251,13 +251,13 @@ int main() {
 			if (import_an == true) {
 				av_node_2* cell = new av_node_2(16, 2);
 				(*cell).set_coupling_conductance(500E-9);
-				//(*cell).set_g_na(253E-9);//NEW
+				//(*cell).set_g_na(5E-13);//NEW
 				fast_cells[cell_number] = cell;
 			}
 			else {
 				av_node_2* cell = new av_node_2(16);
 				(*cell).set_coupling_conductance(500E-9);
-				//(*cell).set_g_na(253E-9);//NEW
+				//(*cell).set_g_na(5E-13);//NEW
 				fast_cells[cell_number] = cell;
 			}
 
@@ -266,27 +266,54 @@ int main() {
 			if (import_n == true) {
 				av_node_2* cell = new av_node_2(1, 1);
 				(*cell).set_coupling_conductance(300E-9);
-				(*cell).set_g_na(3.2E-13 / (1 +exp((cell_number + 25.0 - 238.0) / 2.5))); //jacks: 5 //CHANGE FROM 5E-13 TO 2.53E-9
+				(*cell).set_g_na(3.2E-13 / (1 +exp((cell_number + 25.0 - 238.0) / 2.5))); //jacks: 5 //CHANGE FROM 5E-13 TO 2.53E-9// 3.2 to 4
 				fast_cells[cell_number] = cell;
 			}
 			else {
 				av_node_2* cell = new av_node_2(1);
 				(*cell).set_coupling_conductance(300E-9);
-				(*cell).set_g_na(3.2E-13 / (1 +exp((cell_number + 25.0 - 238.0) / 2.5))); //jacks: 5//CHANGE FROM 5E-13 TO 2.53E-9
+				(*cell).set_g_na(3.2E-13 / (1 +exp((cell_number + 25.0 - 238.0) / 2.5))); //jacks: 5//CHANGE FROM 5E-13 TO 2.53E-9 //3.2 to 4
 				fast_cells[cell_number] = cell;
 			}
 
 		}
-		else {
-			if (import_nh == true) {
-				av_node_2* cell = new av_node_2(19, 3);
+		else if(cell_number>=225 && cell_number <250){
+			if (import_n == true) {
+				av_node_2* cell = new av_node_2(1, 1);
 				if (cell_number < 250) {
 					(*cell).set_coupling_conductance(300E-9);
-					(*cell).set_g_na(4E-13 / (1 +exp((cell_number + 25.0 - 263.0) / -2.5))); //jacks orig:5//CHANGE FROM 5E-13 TO 2.53E-9
+					(*cell).set_g_na(3.2E-13 / (1 +exp((cell_number + 25.0 - 263.0) / -2.5))); //jacks orig:5//CHANGE FROM 5E-13 TO 2.53E-9
 				}
 				else {
 					(*cell).set_coupling_conductance(500E-9); //jacks orig: 500
-					//(*cell).set_g_na(253E-9);//NEW
+					//(*cell).set_g_na(3.2E-13);//NEW
+				}
+				fast_cells[cell_number] = cell;
+			}
+			else {
+				av_node_2* cell = new av_node_2(1);
+				if (cell_number < 250) {
+					(*cell).set_coupling_conductance(300E-9);
+					(*cell).set_g_na(5E-13 / (1 + exp((cell_number + 25.0 - 263.0) / -2.5))); //jacks orig:5//CHANGE FROM 5E-13 TO 2.53E-9
+				}
+				else {
+					(*cell).set_coupling_conductance(500E-9); //jacks orig: 500
+					//(*cell).set_g_na(5E-13);//NEW
+				}
+				fast_cells[cell_number] = cell;
+			}
+
+		}
+		else  {
+			if (import_nh == true) {
+				av_node_2* cell = new av_node_2(19, 3);
+				if (cell_number < 250) {
+					(*cell).set_coupling_conductance(300E-9);//300
+					(*cell).set_g_na(5E-13 / (1 + exp((cell_number + 25.0 - 263.0) / -2.5))); //jacks orig:5//CHANGE FROM 5E-13 TO 2.53E-9
+				}
+				else {
+					(*cell).set_coupling_conductance(500E-9); //jacks orig: 500
+					(*cell).set_g_na(5E-13);//NEW
 				}
 				fast_cells[cell_number] = cell;
 			}
@@ -294,11 +321,11 @@ int main() {
 				av_node_2* cell = new av_node_2(19);
 				if (cell_number < 250) {
 					(*cell).set_coupling_conductance(300E-9);
-					(*cell).set_g_na(4E-13 / (1 + exp((cell_number + 25.0 - 263.0) / -2.5))); //jacks orig:5//CHANGE FROM 5E-13 TO 2.53E-9
+					(*cell).set_g_na(5E-13 / (1 + exp((cell_number + 25.0 - 263.0) / -2.5))); //jacks orig:5//CHANGE FROM 5E-13 TO 2.53E-9
 				}
 				else {
 					(*cell).set_coupling_conductance(500E-9); //jacks orig: 500
-					//(*cell).set_g_na(253E-9);//NEW
+					(*cell).set_g_na(5E-13);//NEW
 				}
 				fast_cells[cell_number] = cell;
 			}
@@ -309,54 +336,54 @@ int main() {
 	//Set time step
 	double time_step = coarse_time_step;
 
-	//Set SKF values, and blocking, for slow pathway
-	for (int i = 0; i < N_slow; i++) {
-		if ((*slow_cells[i]).get_cell_type() == 1) {
-			if (SKF) {
-				(*slow_cells[i]).set_g_ca(1.05E-08);
-				(*slow_cells[i]).set_g_kr(0.7e-09);
-				(*slow_cells[i]).set_g_st(2.15E-09);
-				(*slow_cells[i]).set_g_b(1.3E-09);
-				(*slow_cells[i]).set_p_max(6.4E-10);
-				(*slow_cells[i]).set_k_naca(2.14E-09);
-				(*slow_cells[i]).set_P_na(5.78E-16);
-			}
-		}
-		if (blockNa) {
-			(*slow_cells[i]).block_na(factor_block);
-		}
-		if (blockCa) {
-			(*slow_cells[i]).block_ca(factor_block);
-		}
-	}
+	////Set SKF values, and blocking, for slow pathway
+	//for (int i = 0; i < N_slow; i++) {
+	//	if ((*slow_cells[i]).get_cell_type() == 1) {
+	//		if (SKF) {
+	//			(*slow_cells[i]).set_g_ca(1.05E-08);
+	//			(*slow_cells[i]).set_g_kr(0.7e-09);
+	//			(*slow_cells[i]).set_g_st(2.15E-09);
+	//			(*slow_cells[i]).set_g_b(1.3E-09);
+	//			(*slow_cells[i]).set_p_max(6.4E-10);
+	//			(*slow_cells[i]).set_k_naca(2.14E-09);
+	//			(*slow_cells[i]).set_P_na(5.78E-16);
+	//		}
+	//	}
+	//	if (blockNa) {
+	//		(*slow_cells[i]).block_na(factor_block);
+	//	}
+	//	if (blockCa) {
+	//		(*slow_cells[i]).block_ca(factor_block);
+	//	}
+	//}
 
-	//Set SKF values, and blocking, for fast pathway
-	for (int i = 0; i < N_fast; i++) {
-		if ((*fast_cells[i]).get_cell_type() == 1) {
-			if (SKF) {
-				(*fast_cells[i]).set_g_ca(1.05E-08);
-				(*fast_cells[i]).set_g_kr(0.7e-09);
-				(*fast_cells[i]).set_g_st(2.15E-09);
-				(*fast_cells[i]).set_g_b(1.3E-09);
-				(*fast_cells[i]).set_p_max(6.4E-10);
-				(*fast_cells[i]).set_k_naca(2.14E-09);
-				(*fast_cells[i]).set_P_na(5.78E-16);
-			}
-		}
-		if (blockNa) {
-			(*fast_cells[i]).block_na(factor_block);
-		}
-		if (blockCa) {
-			(*fast_cells[i]).block_ca(factor_block);
-		}
-	}
+	////Set SKF values, and blocking, for fast pathway
+	//for (int i = 0; i < N_fast; i++) {
+	//	if ((*fast_cells[i]).get_cell_type() == 1) {
+	//		if (SKF) {
+	//			(*fast_cells[i]).set_g_ca(1.05E-08);
+	//			(*fast_cells[i]).set_g_kr(0.7e-09);
+	//			(*fast_cells[i]).set_g_st(2.15E-09);
+	//			(*fast_cells[i]).set_g_b(1.3E-09);
+	//			(*fast_cells[i]).set_p_max(6.4E-10);
+	//			(*fast_cells[i]).set_k_naca(2.14E-09);
+	//			(*fast_cells[i]).set_P_na(5.78E-16);
+	//		}
+	//	}
+	//	if (blockNa) {
+	//		(*fast_cells[i]).block_na(factor_block);
+	//	}
+	//	if (blockCa) {
+	//		(*fast_cells[i]).block_ca(factor_block);
+	//	}
+	//}
 
 	//i_bna_invest = true;
 	for (int i{}; i < N_fast; i++) {
-		fast_cell_details << (*fast_cells[i]).get_cell_type() << " \t " << (*fast_cells[i]).get_coupling_conductance() << " \t " << (*fast_cells[i]).get_g_na() << " \t " << (*fast_cells[i]).get_coupling_conductance() << std::endl;
+		fast_cell_details << (*fast_cells[i]).get_cell_type() << " \t " << (*fast_cells[i]).get_cm() << " \t " << (*fast_cells[i]).get_g_na() << " \t " << (*fast_cells[i]).get_coupling_conductance() << std::endl;
 	}
 	for (int i{}; i < N_slow; i++) {
-		slow_cell_details << (*slow_cells[i]).get_cell_type() << " \t " << (*slow_cells[i]).get_coupling_conductance() << " \t " << (*slow_cells[i]).get_g_na() << " \t " << (*slow_cells [i] ).get_coupling_conductance() << std::endl;
+		slow_cell_details << (*slow_cells[i]).get_cell_type() << " \t " << (*slow_cells[i]).get_cm() << " \t " << (*slow_cells[i]).get_g_na() << " \t " << (*slow_cells [i] ).get_coupling_conductance() << std::endl;
 	}
 	//INITIALISE and estimate sim  time
 	double time = 0;
@@ -406,24 +433,24 @@ int main() {
 			for (int i{}; i < 4; i++) {
 				if (test_cells_allowed[i] == true) {
 					if (stimulate_test_cells == false && clamp_test_cells == false) {
-						(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+						(*test_cells[i]).calc_i_all(time_step, solve_method, l);
 						(*test_cells[i]).calc_vm(time_step, solve_method, false);
 					}
 					else if (clamp_test_cells == true) {
 						if (time > clamp_duration + clamp_peak_start_time) {
-							(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+							(*test_cells[i]).calc_i_all(time_step, solve_method, l);
 							(*test_cells[i]).calc_vm(time_step, solve_method, false);
 						}
 						else if (time > clamp_peak_start_time) {
-							(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+							(*test_cells[i]).calc_i_all(time_step, solve_method, l);
 							(*test_cells[i]).set_vm(clamp_peak_voltage);
 						}
 						else if (time > clamp_hold_start_time) {
-							(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+							(*test_cells[i]).calc_i_all(time_step, solve_method, l);
 							(*test_cells[i]).set_vm(clamp_holding_voltage);
 						}
 						else {
-							(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+							(*test_cells[i]).calc_i_all(time_step, solve_method, l);
 							(*test_cells[i]).calc_vm(time_step, solve_method, false);
 						}
 					}
@@ -438,7 +465,7 @@ int main() {
 								(test_cell_stim_counter[i]) += 1;
 							}
 						}
-						(*test_cells[i]).calc_i_all(time_step, solve_method, 0);
+						(*test_cells[i]).calc_i_all(time_step, solve_method, l);
 						(*test_cells[i]).calc_vm(time_step, solve_method, false);
 					}
 				}
@@ -465,7 +492,7 @@ int main() {
 				test_cell_data << std::endl;
 			}
 		}
-		else {//Do multiple voltage clamping
+		else if(allow_test_cells==true){//Do multiple voltage clamping
 			if (multiple_clamp_type == 0) {
 				if (time > clamp_duration + clamp_peak_start_time) {
 					(*test_cells[individual_cell_index]).calc_i_all(time_step, solve_method, 0);
@@ -506,27 +533,27 @@ int main() {
 			}
 			else if (multiple_clamp_type == 1) {
 				if (time > triangle_return_to_hold_time) {
-					(*test_cells[individual_cell_index]).calc_i_all(time_step, solve_method, 0);
+					(*test_cells[individual_cell_index]).calc_i_all(time_step, solve_method, l);
 					(*test_cells[individual_cell_index]).set_vm(clamp_holding_voltage);
 				}
 				else if (time > triangle_peak_time) {
-					(*test_cells[individual_cell_index]).calc_i_all(time_step, solve_method, 0);
+					(*test_cells[individual_cell_index]).calc_i_all(time_step, solve_method, l);
 					double vm_to_set = triangle_peak_voltage + (clamp_holding_voltage - triangle_peak_voltage) * (time - triangle_peak_time) / (triangle_return_to_hold_time - triangle_peak_time);
 					(*test_cells[individual_cell_index]).set_vm(vm_to_set);
 					test_cell_data << time << "\t" << (*test_cells[individual_cell_index]).get_vm() << "\t" << (*test_cells[individual_cell_index]).get_i_kr() << std::endl;
 
 				}
 				else if (time > clamp_peak_start_time) {
-					(*test_cells[individual_cell_index]).calc_i_all(time_step, solve_method, 0);
+					(*test_cells[individual_cell_index]).calc_i_all(time_step, solve_method, l);
 					double vm_to_set = clamp_holding_voltage + (triangle_peak_voltage - clamp_holding_voltage) * (time - clamp_peak_start_time) / (triangle_peak_time - clamp_peak_start_time);
 					(*test_cells[individual_cell_index]).set_vm(vm_to_set);
 				}
 				else if (time > clamp_hold_start_time) {
-					(*test_cells[individual_cell_index]).calc_i_all(time_step, solve_method, 0);
+					(*test_cells[individual_cell_index]).calc_i_all(time_step, solve_method, l);
 					(*test_cells[individual_cell_index]).set_vm(clamp_holding_voltage);
 				}
 				else {
-					(*test_cells[individual_cell_index]).calc_i_all(time_step, solve_method, 0);
+					(*test_cells[individual_cell_index]).calc_i_all(time_step, solve_method, l);
 					(*test_cells[individual_cell_index]).calc_vm(time_step, solve_method, false);
 				}
 				//Now check for currents being mins

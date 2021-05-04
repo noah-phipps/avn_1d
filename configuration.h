@@ -26,7 +26,7 @@ extern double max_dep_voltage;
 extern int type;
 extern bool i_bna_invest;
 extern int solve_method;
-extern int l;
+extern const int l;
 extern bool SKF;
 extern bool blockNa;
 extern bool blockCa;

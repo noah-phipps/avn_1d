@@ -87,7 +87,7 @@ public:
 		set_g_b_ca(0.02);//.02
 		set_p_max(0);//Unused
 		set_k_naca(0.02);//Used for g_NaCa
-		set_P_na(0.0014);
+		set_P_na(0.0034);//.0014
 		set_g_nak(64.41);//Used for Ip
 	}
 	void export_cell(int);
@@ -139,7 +139,7 @@ public:
 	void calc_ICaL(double, int);
 	void calc_ICaT(double, int);
 	void calc_Isus(double, int);
-	void calc_i_ach(double, int);
+	void calc_i_ach(double, int, int);
 	void zero_currents();
 	void zero_variables();
 	double get_i_na(){
