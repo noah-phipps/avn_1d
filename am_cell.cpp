@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
 -------- -
 AM Cell Action Potential Model
-21 / 03 / 2021 Modified by Noah PHIPPS and Gemma LAMB (Removing depreceated C style code, optimising functions, formatting, generally rewritten)
-22 / 03 / 2021 Rewritten by Noah PHIPPS and Gemma LAMB (Created functions for currents)
+21 / 03 / 2021 Modified by Noah PHIPPS (Removing depreceated C style code, optimising functions, formatting, generally rewritten)
+22 / 03 / 2021 Rewritten by Noah PHIPPS (Created functions for currents)
 --------------------------------------------------------------------
 ------ */
 #include "am_cell.h"
