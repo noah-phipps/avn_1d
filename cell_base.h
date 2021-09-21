@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
 -------- -
 Cell Base Abstract Class
-21 / 03 / 2021 Modified by Noah PHIPPS and Gemma LAMB (Removing depreceated C style code, optimising functions, formatting, generally rewritten)
+21 / 03 / 2021 Modified by Noah PHIPPS and Gemma (Removing depreceated C style code, optimising functions, formatting, generally rewritten)
 --------------------------------------------------------------------
 ------ */
 #ifndef CELL_BASE_H
