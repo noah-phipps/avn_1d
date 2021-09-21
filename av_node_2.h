@@ -3,8 +3,8 @@
 AV node cell action potential model
 14 / 12 / 2007 Created by Shin INADA
 11 / 04 / 2008 Modified by Shin INADA(add ACh sensitive current, added intracellular calciumdynamics)
-07 / 11 / 2020 Modified by Noah PHIPPS & Gemma LAMB (Optimisation of currents with respect to experimental data)
-21 / 03 / 2021 Modified by Noah PHIPPS and Gemma LAMB (Removing depreceated C style code, optimising functions, formatting, generally rewritten)
+07 / 11 / 2020 Modified by Noah PHIPPS (Optimisation of currents with respect to experimental data)
+21 / 03 / 2021 Modified by Noah PHIPPS (Removing depreceated C style code, optimising functions, formatting, generally rewritten)
 --------------------------------------------------------------------
 ------ */
 //Header files
