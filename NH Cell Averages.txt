@@ -1,7 +1,0 @@
-Resting Potential average: (-63.12 +/- 0.76) mV
-Amplitude average: (75.72 +/- 1.18) mV
-dv dt Max Value average: (8.20 +/- 0.75) V/s
-MDP average: (-56.48 +/- 1.36) mV
-Overshoot average: (23.77 +/- 0.94) mV
-APD90 average: (118.11 +/- 3.37) ms
-APD50 average: (91.00 +/- 3.95) ms
