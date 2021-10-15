@@ -1,0 +1,10 @@
+Amplitude average: (65.04 +/- 0.44) mV
+dv dt Max Value average: (7.01 +/- 0.32) V/s
+MDP average: (-55.78 +/- 1.06) mV
+Overshoot average: (16.02 +/- 0.73) mV
+APD90 average: (100.21 +/- 2.82) ms
+APD50 average: (65.65 +/- 2.98) ms
+Cycle Length average: (1448.00 +/- 496.00) ms
+ARP average: (151.00 +/- 37.00) ms
+RRP  average: (194.00 +/- 61.00) ms
+DDR average: (74.60 +/- 10.60) V/s
